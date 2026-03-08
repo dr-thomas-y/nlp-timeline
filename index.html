@@ -6,7 +6,6 @@
 <title>NLP 個人時間線導出工具 — 全心策略</title>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -1110,69 +1109,73 @@ async function exportPDF() {
   btn.textContent = '⏳ 產生中…'; btn.disabled = true;
 
   try {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const PW = 210, PH = 297, MX = 14, MY = 12;
-    const CW = PW - MX * 2; // content width
+    // ── Capture top-view canvas ──
+    const topImg = topCanvas.toDataURL('image/png');
 
-    // No text in PDF — images only (avoids CJK font issues)
+    // ── Capture section at hi-res ──
+    const origSW = secCanvas.width, origSH = secCanvas.height;
+    secCanvas.width = 1400; secCanvas.height = 560;
+    drawSection();
+    const secImg = secCanvas.toDataURL('image/png');
+    secCanvas.width = origSW; secCanvas.height = origSH;
+    if (origSW > 0 && origSH > 0) drawSection();
 
-    // ── Helper: capture section to temp canvas ──
-    function captureSection() {
-      const origW = secCanvas.width, origH = secCanvas.height;
-      secCanvas.width = 1400; secCanvas.height = 640;
-      drawSection();
-      const img = secCanvas.toDataURL('image/png');
-      secCanvas.width = origW; secCanvas.height = origH;
-      if (origW > 0 && origH > 0) drawSection();
-      return img;
-    }
-
-    // ── Helper: capture 3D from fixed angle ──
-    function capture3D() {
-      if (!three_ready) return null;
+    // ── Capture 3D from standard angle ──
+    let img3d = null;
+    if (three_ready) {
       const origPos = camera.position.clone();
       const origTgt = controls3d.target.clone();
-      // Front-elevated view: see past left, future right, height visible
       camera.position.set(0, 7, 16);
       camera.lookAt(0, 1.5, 0);
       renderer3d.render(scene, camera);
-      const img = renderer3d.domElement.toDataURL('image/png');
+      img3d = renderer3d.domElement.toDataURL('image/png');
       camera.position.copy(origPos);
       controls3d.target.copy(origTgt);
       camera.lookAt(origTgt);
       renderer3d.render(scene, camera);
-      return img;
     }
 
-    const topImg = topCanvas.toDataURL('image/png');
-    const secImg = captureSection();
-    const img3d  = capture3D();
+    // ── Build print window ──
+    const win = window.open('', '_blank');
+    if (!win) { alert('請允許彈出視窗後再試一次'); return; }
 
-    const topAR  = topCanvas.height / Math.max(1, topCanvas.width);
-    const secAR  = 640 / 1400;
+    const pages = [
+      { src: topImg,  label: 'NLP 時間線 — 俯視圖' },
+      { src: secImg,  label: 'NLP 時間線 — 截面圖' },
+    ];
+    if (img3d) pages.push({ src: img3d, label: 'NLP 時間線 — 3D 空間' });
 
-    // ── Page 1: Top View ──
-    const topH = Math.min(CW * topAR, PH - MX * 2);
-    doc.addImage(topImg, 'PNG', MX, MX, CW, topH);
+    const imgTags = pages.map(p => `
+      <div class="page">
+        <div class="label">${p.label}</div>
+        <img src="${p.src}">
+        <div class="footer">袁希博士、易樟發展師版權所有 ｜ 全心策略 NLP 訓練中心專用</div>
+      </div>`).join('');
 
-    // ── Page 2: Cross Section ──
-    doc.addPage();
-    const secH = Math.min(CW * secAR, PH - MX * 2);
-    doc.addImage(secImg, 'PNG', MX, MX, CW, secH);
-
-    // ── Page 3: 3D Space (if available) ──
-    if (img3d) {
-      doc.addPage();
-      const cvEl = document.getElementById('canvas3d');
-      const ar3d = cvEl.height / Math.max(1, cvEl.width);
-      const h3d  = Math.min(CW * ar3d, PH - MX * 2);
-      doc.addImage(img3d, 'PNG', MX, MX, CW, h3d);
-    }
-
-    const now = new Date();
-    const ts  = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-    doc.save(`NLP-Timeline_${ts}.pdf`);
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>NLP Timeline</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#fff; font-family:sans-serif; }
+  .page {
+    width:100%; page-break-after:always;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:16mm 12mm;
+    min-height:100vh;
+  }
+  .page:last-child { page-break-after:auto; }
+  .label { font-size:16pt; font-weight:bold; margin-bottom:8mm; color:#1a3a5c; }
+  img { max-width:100%; max-height:220mm; object-fit:contain; border:1px solid #ddd; }
+  .footer { margin-top:6mm; font-size:8pt; color:#666; }
+  @media print {
+    .page { min-height:auto; padding:8mm 10mm; }
+    img { max-height:230mm; }
+  }
+</style></head><body>${imgTags}
+<script>window.onload=function(){ window.print(); }<\/script>
+</body></html>`);
+    win.document.close();
   } finally {
     btn.textContent = '📄 匯出 PDF'; btn.disabled = false;
   }
