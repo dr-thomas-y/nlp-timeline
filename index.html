@@ -290,16 +290,16 @@ function col(type) { return COLORS[type] || '#fff'; }
 //  STATE
 // ─────────────────────────────────────────
 let state = {
+  person: { x: 0.50, y: 0.50 },   // independent person position (not tied to any point)
   points: [
-    { id:1, x:0.50, y:0.50, z:5,   label:'現在',   type:'present', tv:'今天',    material:'' },
-    { id:2, x:0.25, y:0.48, z:5,   label:'昨天',   type:'past',    tv:'1天前',   material:'' },
-    { id:3, x:0.12, y:0.44, z:4,   label:'上週',   type:'past',    tv:'1週前',   material:'' },
-    { id:4, x:0.05, y:0.40, z:3.5, label:'上個月', type:'past',    tv:'1個月前', material:'' },
-    { id:5, x:0.72, y:0.52, z:5.5, label:'明天',   type:'future',  tv:'1天後',   material:'' },
-    { id:6, x:0.85, y:0.55, z:6,   label:'下週',   type:'future',  tv:'1週後',   material:'' },
-    { id:7, x:0.94, y:0.58, z:7,   label:'下個月', type:'future',  tv:'1個月後', material:'' },
+    { id:1, x:0.25, y:0.48, z:5,   label:'昨天',   type:'past',    tv:'1天前',   material:'' },
+    { id:2, x:0.12, y:0.44, z:4,   label:'上週',   type:'past',    tv:'1週前',   material:'' },
+    { id:3, x:0.05, y:0.40, z:3.5, label:'上個月', type:'past',    tv:'1個月前', material:'' },
+    { id:4, x:0.72, y:0.52, z:5.5, label:'明天',   type:'future',  tv:'1天後',   material:'' },
+    { id:5, x:0.85, y:0.55, z:6,   label:'下週',   type:'future',  tv:'1週後',   material:'' },
+    { id:6, x:0.94, y:0.58, z:7,   label:'下個月', type:'future',  tv:'1個月後', material:'' },
   ],
-  nextId: 8,
+  nextId: 7,
   selected: null,
   pendingPos: null,
 };
@@ -312,7 +312,7 @@ let histIdx = -1;
 
 function saveState() {
   hist = hist.slice(0, histIdx + 1);
-  hist.push(JSON.parse(JSON.stringify(state.points)));
+  hist.push({ points: JSON.parse(JSON.stringify(state.points)), person: { ...state.person } });
   histIdx = hist.length - 1;
   if (hist.length > 60) { hist.shift(); histIdx--; }
   syncHistBtns();
@@ -324,19 +324,22 @@ function syncHistBtns() {
 function undo() {
   if (histIdx <= 0) return;
   histIdx--;
-  state.points = JSON.parse(JSON.stringify(hist[histIdx]));
+  state.points = JSON.parse(JSON.stringify(hist[histIdx].points));
+  state.person = { ...hist[histIdx].person };
   clearSel(); refreshAll(); syncHistBtns();
 }
 function redo() {
   if (histIdx >= hist.length - 1) return;
   histIdx++;
-  state.points = JSON.parse(JSON.stringify(hist[histIdx]));
+  state.points = JSON.parse(JSON.stringify(hist[histIdx].points));
+  state.person = { ...hist[histIdx].person };
   clearSel(); refreshAll(); syncHistBtns();
 }
 function resetAll() {
-  if (!confirm('確定要重設？所有時間點將被清除，只保留「現在」人物。')) return;
-  state.points = [{ id: state.nextId++, x:0.5, y:0.5, z:5,
-    label:'現在', type:'present', tv:'今天', material:'' }];
+  if (!confirm('確定要重設？所有時間點將被清除，只保留人物。')) return;
+  state.points  = [];
+  state.person  = { x: 0.5, y: 0.5 };
+  state.nextId  = 1;
   clearSel(); saveState(); refreshAll();
 }
 function clearSel() {
@@ -373,6 +376,7 @@ function switchTab(btn, id) {
 const topCanvas = document.getElementById('topCanvas');
 const topCtx    = topCanvas.getContext('2d');
 let topDrag = null, topDragOX = 0, topDragOY = 0, topDragMoved = false;
+let personDragging = false;
 
 function resizeTop() {
   const el = topCanvas.parentElement;
@@ -391,6 +395,11 @@ function hitTop(cx,cy) {
     if (dx*dx+dy*dy < 18*18) return p;
   }
   return null;
+}
+function hitPerson(cx, cy) {
+  const pp = toPx(state.person);
+  const dx = pp.cx-cx, dy = pp.cy-cy;
+  return (dx*dx + dy*dy < 38*38); // generous radius to cover the whole figure
 }
 function evPosTop(e) {
   const r = topCanvas.getBoundingClientRect();
@@ -416,10 +425,9 @@ function drawTop() {
   // Timeline line (under person)
   const pts = sortedPoints();
   if (pts.length >= 2) drawTopLine(ctx, pts);
-  // Person — always visible (present point or canvas centre)
-  const nowPt = state.points.find(p => p.type==='present');
-  const pp = nowPt ? toPx(nowPt) : { cx: W/2, cy: H/2 };
-  drawPersonTop(ctx, pp.cx, pp.cy);
+  // Person — independent position, always visible
+  const personPx = toPx(state.person);
+  drawPersonTop(ctx, personPx.cx, personPx.cy);
   // Point dots
   state.points.forEach(p => drawDot(ctx, p));
 }
@@ -489,26 +497,37 @@ function drawDot(ctx, p) {
 // ── Top Canvas Events ──
 topCanvas.addEventListener('mousedown', e => {
   const pos = evPosTop(e);
-  const hit = hitTop(pos.cx, pos.cy);
   topDragMoved = false;
-  if (hit) {
-    topDrag = hit;
-    topDragOX = pos.cx - toPx(hit).cx;
-    topDragOY = pos.cy - toPx(hit).cy;
-    select(hit.id);
+  const hitPt = hitTop(pos.cx, pos.cy);
+  if (hitPt) {
+    topDrag = hitPt;
+    topDragOX = pos.cx - toPx(hitPt).cx;
+    topDragOY = pos.cy - toPx(hitPt).cy;
+    personDragging = false;
+    select(hitPt.id);
+  } else if (hitPerson(pos.cx, pos.cy)) {
+    personDragging = true;
+    topDragOX = pos.cx - toPx(state.person).cx;
+    topDragOY = pos.cy - toPx(state.person).cy;
+    clearSel();
   }
 });
 topCanvas.addEventListener('mousemove', e => {
-  if (!topDrag) return;
+  if (!topDrag && !personDragging) return;
   const pos = evPosTop(e);
-  const n = toNorm(pos.cx - topDragOX, pos.cy - topDragOY);
-  topDrag.x = n.x; topDrag.y = n.y;
   topDragMoved = true;
+  if (personDragging) {
+    const n = toNorm(pos.cx - topDragOX, pos.cy - topDragOY);
+    state.person.x = n.x; state.person.y = n.y;
+  } else {
+    const n = toNorm(pos.cx - topDragOX, pos.cy - topDragOY);
+    topDrag.x = n.x; topDrag.y = n.y;
+  }
   drawTop(); drawSection(); update3D();
 });
 topCanvas.addEventListener('mouseup', () => {
-  if (topDrag && topDragMoved) saveState();
-  topDrag = null; renderList();
+  if (topDragMoved) saveState();
+  topDrag = null; personDragging = false; renderList();
 });
 topCanvas.addEventListener('click', e => {
   if (topDragMoved) return;
@@ -524,22 +543,35 @@ topCanvas.addEventListener('dblclick', e => {
 topCanvas.addEventListener('touchstart', e => {
   e.preventDefault();
   const pos = evPosTop(e);
-  const hit = hitTop(pos.cx, pos.cy);
   topDragMoved = false;
-  if (hit) { topDrag = hit; topDragOX = pos.cx-toPx(hit).cx; topDragOY = pos.cy-toPx(hit).cy; select(hit.id); }
+  const hitPt = hitTop(pos.cx, pos.cy);
+  if (hitPt) {
+    topDrag = hitPt; personDragging = false;
+    topDragOX = pos.cx-toPx(hitPt).cx; topDragOY = pos.cy-toPx(hitPt).cy;
+    select(hitPt.id);
+  } else if (hitPerson(pos.cx, pos.cy)) {
+    personDragging = true;
+    topDragOX = pos.cx-toPx(state.person).cx; topDragOY = pos.cy-toPx(state.person).cy;
+    clearSel();
+  }
 }, { passive:false });
 topCanvas.addEventListener('touchmove', e => {
   e.preventDefault();
-  if (!topDrag) return;
+  if (!topDrag && !personDragging) return;
   const pos = evPosTop(e);
-  const n = toNorm(pos.cx-topDragOX, pos.cy-topDragOY);
-  topDrag.x = n.x; topDrag.y = n.y;
   topDragMoved = true;
+  if (personDragging) {
+    const n = toNorm(pos.cx-topDragOX, pos.cy-topDragOY);
+    state.person.x = n.x; state.person.y = n.y;
+  } else {
+    const n = toNorm(pos.cx-topDragOX, pos.cy-topDragOY);
+    topDrag.x = n.x; topDrag.y = n.y;
+  }
   drawTop(); drawSection(); update3D();
 }, { passive:false });
 topCanvas.addEventListener('touchend', () => {
-  if (topDrag && topDragMoved) saveState();
-  topDrag = null; renderList();
+  if (topDragMoved) saveState();
+  topDrag = null; personDragging = false; renderList();
 });
 
 // ── Selection & Edit ──
@@ -979,13 +1011,12 @@ function update3D() {
   label3Sprites.forEach(s => scene.remove(s)); label3Sprites = [];
   if (line3Obj) { scene.remove(line3Obj); line3Obj = null; }
 
-  const now = state.points.find(p => p.type==='present') || state.points[0];
-  // Map Z=0 → floor (y=0), Z=Z_PERSON_HEAD → person head (y=1.85), Z=Z_MAX → high above
+  // Use independent person position as 3D origin
   function toW(p) {
     return new THREE.Vector3(
-      (p.x - now.x) * 8,
+      (p.x - state.person.x) * 8,
       p.z * (1.85 / Z_PERSON_HEAD),
-      (p.y - now.y) * 8
+      (p.y - state.person.y) * 8
     );
   }
 
