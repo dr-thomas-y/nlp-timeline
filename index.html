@@ -6,6 +6,7 @@
 <title>NLP 個人時間線導出工具 — 全心策略</title>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -82,6 +83,9 @@ canvas.main-canvas { display: block; }
 }
 .point-item:hover { border-color: rgba(233,69,96,0.5); }
 .point-item.active { border-color: #E94560; background: #2A1020; }
+.point-item.drag-over { border-color: #C8E8FF !important; background: #142030 !important; }
+.drag-handle { color: #4A4A7A; cursor: grab; user-select: none; font-size: 1rem; flex-shrink: 0; padding-right: 4px; }
+.drag-handle:active { cursor: grabbing; }
 .pt-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
 .pt-info { flex: 1; overflow: hidden; }
 .pt-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -156,6 +160,7 @@ footer {
           <button id="redo-btn" class="btn btn-secondary" onclick="redo()" disabled>↪ 下一步</button>
         </div>
         <button class="btn btn-danger btn-full" onclick="resetAll()">⚠ 重設</button>
+        <button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="exportPDF()">📄 匯出 PDF</button>
       </div>
 
       <div class="panel-card">
@@ -292,12 +297,13 @@ function col(type) { return COLORS[type] || '#fff'; }
 let state = {
   person: { x: 0.50, y: 0.50 },   // independent person position (not tied to any point)
   points: [
-    { id:1, x:0.25, y:0.48, z:5,   label:'昨天',   type:'past',    tv:'1天前',   material:'' },
-    { id:2, x:0.12, y:0.44, z:4,   label:'上週',   type:'past',    tv:'1週前',   material:'' },
-    { id:3, x:0.05, y:0.40, z:3.5, label:'上個月', type:'past',    tv:'1個月前', material:'' },
-    { id:4, x:0.72, y:0.52, z:5.5, label:'明天',   type:'future',  tv:'1天後',   material:'' },
-    { id:5, x:0.85, y:0.55, z:6,   label:'下週',   type:'future',  tv:'1週後',   material:'' },
-    { id:6, x:0.94, y:0.58, z:7,   label:'下個月', type:'future',  tv:'1個月後', material:'' },
+    // Order matters — this defines the timeline line drawing order
+    { id:3, x:0.05, y:0.40, z:3.5, label:'上個月', type:'past',   tv:'1個月前', material:'' },
+    { id:2, x:0.12, y:0.44, z:4,   label:'上週',   type:'past',   tv:'1週前',   material:'' },
+    { id:1, x:0.25, y:0.48, z:5,   label:'昨天',   type:'past',   tv:'1天前',   material:'' },
+    { id:4, x:0.72, y:0.52, z:5.5, label:'明天',   type:'future', tv:'1天後',   material:'' },
+    { id:5, x:0.85, y:0.55, z:6,   label:'下週',   type:'future', tv:'1週後',   material:'' },
+    { id:6, x:0.94, y:0.58, z:7,   label:'下個月', type:'future', tv:'1個月後', material:'' },
   ],
   nextId: 7,
   selected: null,
@@ -351,11 +357,8 @@ function refreshAll() { drawTop(); drawSection(); update3D(); renderList(); }
 // ─────────────────────────────────────────
 //  HELPERS
 // ─────────────────────────────────────────
-function sortedPoints() {
-  const order = { past:0, present:1, future:2 };
-  return [...state.points].sort((a,b) =>
-    order[a.type] !== order[b.type] ? order[a.type]-order[b.type] : a.id-b.id);
-}
+// Returns points in user-defined array order (drag-reorderable)
+function sortedPoints() { return [...state.points]; }
 
 // ─────────────────────────────────────────
 //  TAB SWITCHING
@@ -621,19 +624,46 @@ function deleteSelected() {
   clearSel(); saveState(); refreshAll();
 }
 
+let listDragSrcIdx = null;
 function renderList() {
   const el = document.getElementById('point-list');
   el.innerHTML = '';
-  sortedPoints().forEach(p => {
+  state.points.forEach((p, i) => {
     const d = document.createElement('div');
     d.className = 'point-item' + (p.id === state.selected ? ' active' : '');
+    d.draggable = true;
     d.innerHTML =
-      `<div class="pt-dot" style="background:${col(p.type)}"></div>
+      `<span class="drag-handle" title="拖動排序">⠿</span>
+       <div class="pt-dot" style="background:${col(p.type)}"></div>
        <div class="pt-info">
          <div class="pt-name">${p.label}</div>
          <div class="pt-meta">${p.tv}　Z:${p.z}${p.material ? '　'+p.material : ''}</div>
        </div>`;
-    d.onclick = () => select(p.id);
+    d.onclick = (e) => { if (e.target.classList.contains('drag-handle')) return; select(p.id); };
+    d.addEventListener('dragstart', e => {
+      listDragSrcIdx = i;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => d.style.opacity = '0.4', 0);
+    });
+    d.addEventListener('dragend', () => {
+      d.style.opacity = '1';
+      el.querySelectorAll('.point-item').forEach(x => x.classList.remove('drag-over'));
+    });
+    d.addEventListener('dragover', e => {
+      e.preventDefault();
+      el.querySelectorAll('.point-item').forEach(x => x.classList.remove('drag-over'));
+      d.classList.add('drag-over');
+    });
+    d.addEventListener('drop', e => {
+      e.preventDefault();
+      if (listDragSrcIdx === null || listDragSrcIdx === i) return;
+      const items = [...state.points];
+      const [moved] = items.splice(listDragSrcIdx, 1);
+      items.splice(i, 0, moved);
+      state.points = items;
+      listDragSrcIdx = null;
+      saveState(); refreshAll();
+    });
     el.appendChild(d);
   });
 }
@@ -718,11 +748,9 @@ function drawSection() {
     ctx.beginPath(); ctx.moveTo(S_PL-4, ty); ctx.lineTo(S_PL+cW, ty); ctx.stroke();
   }
 
-  // Axis labels — two lines well below axis
+  // Axis label
   ctx.fillStyle = '#8A8AAA'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
   ctx.fillText('← 過去　｜　時間軸　｜　未來 →', S_PL+cW/2, S_PT+cH+32);
-  ctx.fillStyle = 'rgba(0,212,170,0.6)'; ctx.font = '12px sans-serif';
-  ctx.fillText('（人物面向右方，即未來方向）', S_PL+cW/2, S_PT+cH+52);
 
   // Y axis label
   ctx.save();
@@ -787,26 +815,23 @@ function drawSection() {
   ctx.fillStyle = 'rgba(0,212,170,0.75)'; ctx.font = 'bold 12px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('當事人', pSx, feetY + 20);
-  ctx.fillStyle = 'rgba(0,212,170,0.5)'; ctx.font = '11px sans-serif';
-  ctx.fillText('面向右方 →', pSx, feetY + 36);
   ctx.restore();
 
-  // ── Compute X positions for each point ──
+  // ── Compute X positions using real distance from person ──
   const pts = sortedPoints();
-  const pastArr   = pts.filter(p => p.type==='past');
-  const nowArr    = pts.filter(p => p.type==='present');
-  const futureArr = pts.filter(p => p.type==='future');
+  const personNx = state.person.x, personNy = state.person.y;
+  const dists = pts.map(p => Math.sqrt((p.x-personNx)**2 + (p.y-personNy)**2));
+  const maxDist = Math.max(0.001, ...dists);
+  const distScale = (cW * 0.44) / maxDist;
   const mapped = [];
 
-  pastArr.forEach((p,i) => {
-    const sx = S_PL + ((i+1)/(pastArr.length+1)) * cW * 0.44;
-    mapped.push({ ...p, sx, sy: S_PT + cH - (p.z/Z_MAX)*cH });
-  });
-  nowArr.forEach(p => {
-    mapped.push({ ...p, sx: S_PL + cW*0.5, sy: S_PT + cH - (p.z/Z_MAX)*cH });
-  });
-  futureArr.forEach((p,i) => {
-    const sx = S_PL + cW*0.56 + ((i+1)/(futureArr.length+1)) * cW * 0.44;
+  pts.forEach((p, i) => {
+    const dist = dists[i];
+    let sx;
+    if      (p.type === 'past')    sx = pSx - dist * distScale;
+    else if (p.type === 'future')  sx = pSx + dist * distScale;
+    else                           sx = pSx; // present
+    sx = Math.max(S_PL + 8, Math.min(S_PL + cW - 8, sx));
     mapped.push({ ...p, sx, sy: S_PT + cH - (p.z/Z_MAX)*cH });
   });
   secMapped = mapped; // store for drag hit-test
@@ -932,7 +957,7 @@ function init3D() {
     camera.position.set(0, 8, 14);
     camera.lookAt(0, 1, 0);
 
-    renderer3d = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
+    renderer3d = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true });
     renderer3d.setPixelRatio(window.devicePixelRatio);
     renderer3d.setSize(W, H);
 
@@ -1076,6 +1101,102 @@ document.addEventListener('keydown', e => {
   if ((e.metaKey||e.ctrlKey) && e.shiftKey  && (e.key==='z'||e.key==='Z')) { e.preventDefault(); redo(); }
   if ((e.metaKey||e.ctrlKey) && (e.key==='y'||e.key==='Y'))                 { e.preventDefault(); redo(); }
 });
+
+// ════════════════════════════════════════
+//  PDF EXPORT
+// ════════════════════════════════════════
+async function exportPDF() {
+  const btn = document.querySelector('[onclick="exportPDF()"]');
+  btn.textContent = '⏳ 產生中…'; btn.disabled = true;
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const PW = 210, PH = 297, MX = 14, MY = 12;
+    const CW = PW - MX * 2; // content width
+
+    // ── Helper: draw page header ──
+    function pageHeader(doc, label, yStart) {
+      doc.setFillColor(22, 22, 48);
+      doc.rect(0, 0, PW, 18, 'F');
+      doc.setFontSize(11); doc.setTextColor(240, 240, 240);
+      doc.text('NLP 個人時間線 — 視覺化報告　｜　全心策略 NLP 訓練中心', MX, 12);
+      doc.setFontSize(13); doc.setTextColor(233, 69, 96);
+      doc.text(label, MX, yStart);
+      doc.setDrawColor(233, 69, 96); doc.setLineWidth(0.4);
+      doc.line(MX, yStart + 2, MX + CW, yStart + 2);
+    }
+
+    // ── Helper: capture section to temp canvas ──
+    function captureSection() {
+      const origW = secCanvas.width, origH = secCanvas.height;
+      secCanvas.width = 1400; secCanvas.height = 640;
+      drawSection();
+      const img = secCanvas.toDataURL('image/png');
+      secCanvas.width = origW; secCanvas.height = origH;
+      if (origW > 0 && origH > 0) drawSection();
+      return img;
+    }
+
+    // ── Helper: capture 3D from fixed angle ──
+    function capture3D() {
+      if (!three_ready) return null;
+      const origPos = camera.position.clone();
+      const origTgt = controls3d.target.clone();
+      // Front-elevated view: see past left, future right, height visible
+      camera.position.set(0, 7, 16);
+      camera.lookAt(0, 1.5, 0);
+      renderer3d.render(scene, camera);
+      const img = renderer3d.domElement.toDataURL('image/png');
+      camera.position.copy(origPos);
+      controls3d.target.copy(origTgt);
+      camera.lookAt(origTgt);
+      renderer3d.render(scene, camera);
+      return img;
+    }
+
+    const topImg = topCanvas.toDataURL('image/png');
+    const secImg = captureSection();
+    const img3d  = capture3D();
+
+    const topAR  = topCanvas.height / Math.max(1, topCanvas.width);
+    const secAR  = 640 / 1400;
+
+    // ── Page 1: 俯視圖 ──
+    pageHeader(doc, '一、俯視圖（從上方俯視時間線分佈）', 25);
+    const topH = Math.min(CW * topAR, 120);
+    doc.addImage(topImg, 'PNG', MX, 30, CW, topH);
+    // Footer
+    doc.setFontSize(8); doc.setTextColor(90, 90, 120);
+    doc.text('袁希博士、易樟發展師版權所有　｜　全心策略 NLP 訓練中心專用', PW/2, PH - 8, { align: 'center' });
+
+    // ── Page 2: 截面圖 ──
+    doc.addPage();
+    pageHeader(doc, '二、截面圖（時間線高度分佈，人物面向右方）', 25);
+    const secH = Math.min(CW * secAR, 90);
+    doc.addImage(secImg, 'PNG', MX, 30, CW, secH);
+    doc.setFontSize(8); doc.setTextColor(90, 90, 120);
+    doc.text('袁希博士、易樟發展師版權所有　｜　全心策略 NLP 訓練中心專用', PW/2, PH - 8, { align: 'center' });
+
+    // ── Page 3: 3D 空間圖 (if available) ──
+    if (img3d) {
+      doc.addPage();
+      pageHeader(doc, '三、3D 空間圖（立體視角：左=過去 / 右=未來 / 高度=Z值）', 25);
+      const cvEl = document.getElementById('canvas3d');
+      const ar3d = cvEl.height / Math.max(1, cvEl.width);
+      const h3d  = Math.min(CW * ar3d, 140);
+      doc.addImage(img3d, 'PNG', MX, 30, CW, h3d);
+      doc.setFontSize(8); doc.setTextColor(90, 90, 120);
+      doc.text('袁希博士、易樟發展師版權所有　｜　全心策略 NLP 訓練中心專用', PW/2, PH - 8, { align: 'center' });
+    }
+
+    const now = new Date();
+    const ts  = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    doc.save(`NLP時間線_${ts}.pdf`);
+  } finally {
+    btn.textContent = '📄 匯出 PDF'; btn.disabled = false;
+  }
+}
 
 // ════════════════════════════════════════
 //  INIT
