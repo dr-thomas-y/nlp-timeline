@@ -660,7 +660,7 @@ document.getElementById('add-modal').addEventListener('click', function(e) {
 // ════════════════════════════════════════
 const secCanvas = document.getElementById('sectionCanvas');
 const secCtx    = secCanvas.getContext('2d');
-const S_PL=70, S_PR=65, S_PT=50, S_PB=95; // padding
+const S_PL=70, S_PR=65, S_PT=50, S_PB=120; // padding — extra bottom room for 2 label lines + hint bar
 let secMapped = [];   // computed positions from last drawSection
 let secDrag   = null;
 
@@ -920,7 +920,7 @@ function init3D() {
 
     controls3d = new THREE.OrbitControls(camera, renderer3d.domElement);
     controls3d.enableDamping = true; controls3d.dampingFactor = 0.07;
-    controls3d.target.set(0, 1, 0);
+    controls3d.target.set(0, 2, 0);
 
     scene.add(new THREE.GridHelper(24, 24, 0x1A1A3A, 0x111130));
     scene.add(new THREE.AxesHelper(4));
@@ -994,10 +994,11 @@ function update3D() {
   if (line3Obj) { scene.remove(line3Obj); line3Obj = null; }
 
   const now = state.points.find(p => p.type==='present') || state.points[0];
+  // Map Z=0 → floor (y=0), Z=Z_PERSON_HEAD → person head (y=1.85), Z=Z_MAX → high above
   function toW(p) {
     return new THREE.Vector3(
       (p.x - now.x) * 8,
-      p.z / Z_MAX * 4 - 2,
+      p.z * (1.85 / Z_PERSON_HEAD),
       (p.y - now.y) * 8
     );
   }
