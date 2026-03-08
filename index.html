@@ -8,316 +8,125 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
   font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  background: #0F0F1E;
-  color: #E0E0E0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  background: #0F0F1E; color: #E0E0E0;
+  min-height: 100vh; display: flex; flex-direction: column;
 }
-
-/* ── Header ── */
 header {
   background: linear-gradient(135deg, #161630, #0F3460);
-  padding: 18px 30px;
-  border-bottom: 2px solid #E94560;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  flex-shrink: 0;
+  padding: 18px 30px; border-bottom: 2px solid #E94560;
+  display: flex; align-items: center; gap: 15px; flex-shrink: 0;
 }
-.header-logo {
-  font-size: 2rem;
-  line-height: 1;
-}
-header h1 {
-  font-size: 1.4rem;
-  color: #F0F0F0;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-header .subtitle {
-  color: #8A8AAA;
-  font-size: 0.8rem;
-  margin-top: 3px;
-}
-
-/* ── Tabs ── */
+.header-logo { font-size: 2rem; line-height: 1; }
+header h1 { font-size: 1.4rem; color: #F0F0F0; font-weight: 700; letter-spacing: 1px; }
+header .subtitle { color: #8A8AAA; font-size: 0.8rem; margin-top: 3px; }
 .tabs {
-  display: flex;
-  background: #161630;
-  padding: 0 30px;
-  border-bottom: 1px solid #252550;
-  flex-shrink: 0;
+  display: flex; background: #161630;
+  padding: 0 30px; border-bottom: 1px solid #252550; flex-shrink: 0;
 }
 .tab-btn {
-  padding: 14px 24px;
-  background: none;
-  border: none;
-  border-bottom: 3px solid transparent;
-  color: #8A8AAA;
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-family: inherit;
-  transition: all 0.25s;
-  letter-spacing: 0.5px;
+  padding: 14px 24px; background: none;
+  border: none; border-bottom: 3px solid transparent;
+  color: #8A8AAA; cursor: pointer; font-size: 0.95rem;
+  font-family: inherit; transition: all 0.25s; letter-spacing: 0.5px;
 }
-.tab-btn.active {
-  color: #E94560;
-  border-bottom-color: #E94560;
-}
-.tab-btn:hover:not(.active) {
-  color: #D0D0D0;
-  border-bottom-color: rgba(233,69,96,0.4);
-}
-
-/* ── Tab Content ── */
-.tab-content {
-  display: none;
-  flex: 1;
-  min-height: 0;
-}
-.tab-content.active {
-  display: flex;
-}
-
-/* ── View Layout ── */
-.view-wrap {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-}
-.canvas-area {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  background: #0A0A18;
-}
-canvas.main-canvas {
-  display: block;
-}
-
-/* ── Side Panel ── */
+.tab-btn.active { color: #E94560; border-bottom-color: #E94560; }
+.tab-btn:hover:not(.active) { color: #D0D0D0; border-bottom-color: rgba(233,69,96,0.4); }
+.tab-content { display: none; flex: 1; min-height: 0; }
+.tab-content.active { display: flex; }
+.view-wrap { display: flex; flex: 1; min-height: 0; }
+.canvas-area { flex: 1; position: relative; overflow: hidden; background: #0A0A18; }
+canvas.main-canvas { display: block; }
 .side-panel {
-  width: 290px;
-  background: #161630;
-  border-left: 1px solid #252550;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  overflow-y: auto;
-  flex-shrink: 0;
+  width: 290px; background: #161630; border-left: 1px solid #252550;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px; overflow-y: auto; flex-shrink: 0;
 }
+.side-panel::-webkit-scrollbar { width: 4px; }
+.side-panel::-webkit-scrollbar-thumb { background: #352550; border-radius: 4px; }
 .panel-card {
-  background: #1A1A35;
-  border: 1px solid #252550;
-  border-radius: 10px;
-  padding: 14px;
+  background: #1A1A35; border: 1px solid #252550;
+  border-radius: 10px; padding: 14px;
 }
 .panel-card h3 {
-  font-size: 0.75rem;
-  color: #E94560;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 12px;
-  font-weight: 600;
+  font-size: 0.75rem; color: #E94560;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 12px; font-weight: 600;
 }
-
-/* ── Buttons ── */
 .btn {
-  width: 100%;
-  padding: 9px 14px;
-  border: none;
-  border-radius: 7px;
-  cursor: pointer;
-  font-size: 0.88rem;
-  font-family: inherit;
-  transition: all 0.2s;
-  font-weight: 500;
+  padding: 9px 14px; border: none; border-radius: 7px;
+  cursor: pointer; font-size: 0.88rem; font-family: inherit;
+  transition: all 0.2s; font-weight: 500;
 }
-.btn-primary {
-  background: #E94560;
-  color: white;
-}
+.btn-full { width: 100%; }
+.btn-primary   { background: #E94560; color: white; }
 .btn-primary:hover { background: #C73452; }
-.btn-secondary {
-  background: #252550;
-  color: #C0C0D0;
-}
+.btn-secondary { background: #252550; color: #C0C0D0; }
 .btn-secondary:hover { background: #30305A; }
-.btn-danger {
-  background: transparent;
-  color: #FF6B6B;
-  border: 1px solid #FF6B6B;
-}
+.btn-danger { background: transparent; color: #FF6B6B; border: 1px solid #FF6B6B; }
 .btn-danger:hover { background: rgba(255,107,107,0.1); }
-
-/* ── Texture Buttons ── */
-.texture-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 7px;
-}
-.tex-btn {
-  padding: 8px;
-  background: #1A1A35;
-  border: 1px solid #252550;
-  border-radius: 7px;
-  color: #C0C0D0;
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-family: inherit;
-  transition: all 0.2s;
-  text-align: center;
-}
-.tex-btn.active {
-  border-color: #E94560;
-  color: #E94560;
-  background: #2A1A2E;
-}
-
-/* ── Point List ── */
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-row { display: flex; gap: 8px; }
+.btn-row .btn { flex: 1; }
 .point-list {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  max-height: 260px;
-  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 7px;
+  max-height: 260px; overflow-y: auto;
 }
 .point-list::-webkit-scrollbar { width: 4px; }
-.point-list::-webkit-scrollbar-track { background: transparent; }
 .point-list::-webkit-scrollbar-thumb { background: #352550; border-radius: 4px; }
-
 .point-item {
-  background: #1E1E40;
-  border: 1px solid #252550;
-  border-radius: 7px;
-  padding: 9px 11px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  transition: all 0.2s;
+  background: #1E1E40; border: 1px solid #252550;
+  border-radius: 7px; padding: 9px 11px;
+  cursor: pointer; display: flex; align-items: center; gap: 9px; transition: all 0.2s;
 }
 .point-item:hover { border-color: rgba(233,69,96,0.5); }
 .point-item.active { border-color: #E94560; background: #2A1020; }
-.pt-dot {
-  width: 11px; height: 11px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  box-shadow: 0 0 6px currentColor;
-}
+.pt-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
 .pt-info { flex: 1; overflow: hidden; }
 .pt-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pt-meta { font-size: 0.73rem; color: #8A8AAA; }
-
-/* ── Edit Form ── */
-.edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-.fg {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.edit-form { display: flex; flex-direction: column; gap: 9px; }
+.fg { display: flex; flex-direction: column; gap: 4px; }
 .fg label { font-size: 0.75rem; color: #8A8AAA; }
 .fg input, .fg select {
-  background: #0F0F1E;
-  border: 1px solid #252550;
-  color: #E0E0E0;
-  padding: 7px 10px;
-  border-radius: 6px;
-  font-size: 0.88rem;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s;
+  background: #0F0F1E; border: 1px solid #252550; color: #E0E0E0;
+  padding: 7px 10px; border-radius: 6px; font-size: 0.88rem;
+  font-family: inherit; outline: none; transition: border-color 0.2s;
 }
 .fg input:focus, .fg select:focus { border-color: #E94560; }
-.fg input[type="range"] { padding: 4px 0; accent-color: #E94560; }
-.range-row { display: flex; align-items: center; gap: 8px; }
-.range-row input { flex: 1; }
-.range-val {
-  min-width: 28px;
-  text-align: center;
-  font-size: 0.88rem;
-  color: #E94560;
-  font-weight: 600;
-}
-
-/* ── Hint bar ── */
 .hint-bar {
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
+  position: absolute; bottom: 14px; left: 50%;
   transform: translateX(-50%);
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(6px);
-  color: #8A8AAA;
-  padding: 7px 16px;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  pointer-events: none;
-  white-space: nowrap;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+  color: #8A8AAA; padding: 7px 16px; border-radius: 20px;
+  font-size: 0.78rem; pointer-events: none; white-space: nowrap;
   border: 1px solid rgba(255,255,255,0.07);
 }
-
-/* ── Legend ── */
-.legend-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  color: #C0C0D0;
-  margin-bottom: 4px;
+.texture-box {
+  background: rgba(200,232,255,0.05); border: 1px solid rgba(200,232,255,0.15);
+  border-radius: 7px; padding: 10px 12px;
 }
-
-/* ── Modal ── */
+.texture-name { font-size: 1rem; font-weight: 700; color: #C8E8FF; margin-bottom: 5px; }
+.texture-desc { font-size: 0.8rem; color: #8A9AAA; line-height: 1.6; }
+.legend-row { display: flex; align-items: center; gap: 8px; font-size: 0.83rem; color: #C0C0D0; margin-bottom: 5px; }
 .modal-backdrop {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.75);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  display: none; align-items: center; justify-content: center; z-index: 999;
 }
 .modal-backdrop.open { display: flex; }
 .modal {
-  background: #161630;
-  border: 1px solid #E94560;
-  border-radius: 14px;
-  padding: 26px;
-  width: 360px;
-  max-width: 92vw;
+  background: #161630; border: 1px solid #E94560;
+  border-radius: 14px; padding: 26px; width: 360px; max-width: 92vw;
   box-shadow: 0 0 40px rgba(233,69,96,0.25);
 }
-.modal h3 {
-  font-size: 1.05rem;
-  color: #E94560;
-  margin-bottom: 18px;
-  font-weight: 700;
-}
-.modal-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
-}
+.modal h3 { font-size: 1.05rem; color: #E94560; margin-bottom: 18px; font-weight: 700; }
+.modal-actions { display: flex; gap: 10px; margin-top: 18px; }
 .modal-actions .btn { flex: 1; }
-
-/* ── Footer ── */
 footer {
-  background: #0A0A18;
-  border-top: 1px solid #252550;
-  padding: 14px 30px;
-  text-align: center;
-  color: #5A5A7A;
-  font-size: 0.78rem;
-  flex-shrink: 0;
-  letter-spacing: 0.5px;
+  background: #0A0A18; border-top: 1px solid #252550;
+  padding: 14px 30px; text-align: center;
+  color: #5A5A7A; font-size: 0.78rem; flex-shrink: 0; letter-spacing: 0.5px;
 }
 </style>
 </head>
@@ -332,33 +141,40 @@ footer {
 </header>
 
 <div class="tabs">
-  <button class="tab-btn active" data-tab="view-top" onclick="switchTab(this,'view-top')">🔭 俯視圖</button>
-  <button class="tab-btn" data-tab="view-section" onclick="switchTab(this,'view-section')">📐 截面圖</button>
-  <button class="tab-btn" data-tab="view-3d" onclick="switchTab(this,'view-3d')">🌐 3D 空間圖</button>
+  <button class="tab-btn active" onclick="switchTab(this,'view-top')">🔭 俯視圖</button>
+  <button class="tab-btn" onclick="switchTab(this,'view-section')">📐 截面圖</button>
+  <button class="tab-btn" onclick="switchTab(this,'view-3d')">🌐 3D 空間圖</button>
 </div>
 
-<!-- ===================== TOP VIEW ===================== -->
+<!-- ══════════ TOP VIEW ══════════ -->
 <div id="view-top" class="tab-content active">
   <div class="view-wrap">
     <div class="canvas-area">
       <canvas id="topCanvas" class="main-canvas"></canvas>
-      <div class="hint-bar">點擊空白處新增點位 ｜ 拖動移動 ｜ 雙擊編輯</div>
+      <div class="hint-bar">點擊空白處新增 ｜ 拖動移動 ｜ 雙擊編輯</div>
     </div>
     <div class="side-panel">
 
       <div class="panel-card">
+        <h3>控制</h3>
+        <div class="btn-row" style="margin-bottom:8px">
+          <button id="undo-btn" class="btn btn-secondary" onclick="undo()" disabled>↩ 上一步</button>
+          <button id="redo-btn" class="btn btn-secondary" onclick="redo()" disabled>↪ 下一步</button>
+        </div>
+        <button class="btn btn-danger btn-full" onclick="resetAll()">⚠ 重設</button>
+      </div>
+
+      <div class="panel-card">
         <h3>線條材質</h3>
-        <div class="texture-grid">
-          <button class="tex-btn active" onclick="setTexture('光束',this)">✨ 光束</button>
-          <button class="tex-btn" onclick="setTexture('麻繩',this)">🪢 麻繩</button>
-          <button class="tex-btn" onclick="setTexture('鐵鍊',this)">⛓ 鐵鍊</button>
-          <button class="tex-btn" onclick="setTexture('流水',this)">💧 流水</button>
+        <div class="texture-box">
+          <div class="texture-name">✨ 光束</div>
+          <div class="texture-desc">如一道光束穿越時間，連結過去、現在與未來。請在「材質備註」欄記錄當事人描述的實際感受材質。</div>
         </div>
       </div>
 
       <div class="panel-card">
         <h3>新增點位</h3>
-        <button class="btn btn-primary" onclick="openAddModal()">＋ 新增時間點</button>
+        <button class="btn btn-primary btn-full" onclick="openAddModal()">＋ 新增時間點</button>
       </div>
 
       <div class="panel-card" id="edit-card" style="display:none">
@@ -381,14 +197,11 @@ footer {
             <input type="text" id="edit-timeval" placeholder="例如：1天前、上個月">
           </div>
           <div class="fg">
-            <label>高度（Z）</label>
-            <div class="range-row">
-              <input type="range" id="edit-z" min="0" max="10" step="0.5" value="5" oninput="syncZ('edit')">
-              <span class="range-val" id="edit-z-val">5</span>
-            </div>
+            <label>材質備註（當事人描述）</label>
+            <input type="text" id="edit-material" placeholder="例如：光束、麻繩、鐵鍊...">
           </div>
-          <button class="btn btn-primary" onclick="applyEdit()">套用變更</button>
-          <button class="btn btn-danger" onclick="deleteSelected()">刪除此點</button>
+          <button class="btn btn-primary btn-full" id="apply-btn" onclick="applyEdit()">套用變更</button>
+          <button class="btn btn-danger btn-full" onclick="deleteSelected()">刪除此點</button>
         </div>
       </div>
 
@@ -401,42 +214,43 @@ footer {
   </div>
 </div>
 
-<!-- ===================== CROSS SECTION ===================== -->
+<!-- ══════════ CROSS SECTION ══════════ -->
 <div id="view-section" class="tab-content">
   <div class="view-wrap">
     <div class="canvas-area">
       <canvas id="sectionCanvas" class="main-canvas"></canvas>
-      <div class="hint-bar">橫軸為時間方向，縱軸為高度</div>
+      <div class="hint-bar">上下拖動點位以調整高度</div>
     </div>
     <div class="side-panel">
       <div class="panel-card">
         <h3>截面圖說明</h3>
-        <p style="font-size:0.82rem;color:#8A8AAA;line-height:1.7;">
+        <p style="font-size:0.82rem;color:#8A8AAA;line-height:1.75;">
           截面圖呈現時間線在立體空間中的<strong style="color:#C0C0D0;">高度分佈</strong>。<br><br>
-          觀察線條是否穿過人物身體、高於頭頂或低於腰部，可了解當事人潛意識對時間的空間投射方式。
+          觀察線條是否穿過人物身體、高於頭頂或低於腰部，可了解當事人潛意識對時間的空間投射。<br><br>
+          直接在圖上<strong style="color:#C8E8FF;">拖動圓點</strong>調整高度。
         </p>
       </div>
       <div class="panel-card">
-        <h3>高度參考</h3>
-        <div style="font-size:0.82rem;color:#8A8AAA;line-height:2;">
-          <div>Z = 10 ：頭頂以上</div>
-          <div>Z = 7–9 ：肩膀至頭頂</div>
-          <div>Z = 5   ：腰部（預設）</div>
-          <div>Z = 2–4 ：膝蓋以下</div>
-          <div>Z = 0   ：地面</div>
+        <h3>高度參考（Z 值）</h3>
+        <div style="font-size:0.82rem;color:#8A8AAA;line-height:2.2;">
+          <div>Z = 15 ：遠超頭頂（約三倍身高）</div>
+          <div>Z = 10 ：頭頂以上一倍身高</div>
+          <div>Z = 5   ：頭頂（人物實際高度）</div>
+          <div>Z = 2.5 ：腰部</div>
+          <div>Z = 0   ：地面（腳底）</div>
         </div>
       </div>
       <div class="panel-card">
         <h3>圖例</h3>
-        <div class="legend-row"><span class="pt-dot" style="background:#6C63FF;color:#6C63FF"></span> 過去</div>
-        <div class="legend-row"><span class="pt-dot" style="background:#00D4AA;color:#00D4AA"></span> 現在</div>
-        <div class="legend-row"><span class="pt-dot" style="background:#FFB347;color:#FFB347"></span> 未來</div>
+        <div class="legend-row"><span class="pt-dot" style="background:#8A7FFF"></span> 過去</div>
+        <div class="legend-row"><span class="pt-dot" style="background:#00D4AA"></span> 現在</div>
+        <div class="legend-row"><span class="pt-dot" style="background:#FFB347"></span> 未來</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===================== 3D VIEW ===================== -->
+<!-- ══════════ 3D VIEW ══════════ -->
 <div id="view-3d" class="tab-content">
   <div style="flex:1;position:relative;">
     <canvas id="canvas3d" style="display:block;width:100%;height:100%;"></canvas>
@@ -444,12 +258,9 @@ footer {
   </div>
 </div>
 
-<!-- ===================== FOOTER ===================== -->
-<footer>
-  袁希博士、易樟發展師版權所有 ｜ 全心策略 NLP 訓練中心專用
-</footer>
+<footer>袁希博士、易樟發展師版權所有 ｜ 全心策略 NLP 訓練中心專用</footer>
 
-<!-- ===================== MODAL ===================== -->
+<!-- ══════════ ADD MODAL ══════════ -->
 <div class="modal-backdrop" id="add-modal">
   <div class="modal">
     <h3>＋ 新增時間點</h3>
@@ -470,13 +281,6 @@ footer {
         <label>時間說明</label>
         <input type="text" id="add-timeval" placeholder="例如：1天前、上個月、3年後">
       </div>
-      <div class="fg">
-        <label>高度（Z）— 0=地面 ／ 10=頭頂以上</label>
-        <div class="range-row">
-          <input type="range" id="add-z" min="0" max="10" step="0.5" value="5" oninput="syncZ('add')">
-          <span class="range-val" id="add-z-val">5</span>
-        </div>
-      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeAddModal()">取消</button>
@@ -485,46 +289,83 @@ footer {
   </div>
 </div>
 
+<!-- ══════════ SCRIPT ══════════ -->
 <script>
 // ─────────────────────────────────────────
-//  SHARED STATE
+//  CONSTANTS
 // ─────────────────────────────────────────
-const COLORS = { past: '#6C63FF', present: '#00D4AA', future: '#FFB347' };
+const Z_MAX         = 15;   // total height scale
+const Z_PERSON_HEAD = 5;    // person head height (person stands 0→5)
+const LINE_COLOR    = '#C8E8FF'; // unified light-beam colour for all lines
+const COLORS = { past: '#8A7FFF', present: '#00D4AA', future: '#FFB347' };
+function col(type) { return COLORS[type] || '#fff'; }
 
+// ─────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────
 let state = {
   points: [
-    { id: 1, x: 0.50, y: 0.50, z: 5, label: '現在',  type: 'present', tv: '今天'   },
-    { id: 2, x: 0.25, y: 0.48, z: 5, label: '昨天',  type: 'past',    tv: '1天前'  },
-    { id: 3, x: 0.12, y: 0.44, z: 4, label: '上週',  type: 'past',    tv: '1週前'  },
-    { id: 4, x: 0.05, y: 0.40, z: 3, label: '上個月', type: 'past',   tv: '1個月前' },
-    { id: 5, x: 0.72, y: 0.52, z: 5.5, label: '明天', type: 'future', tv: '1天後'  },
-    { id: 6, x: 0.85, y: 0.55, z: 6, label: '下週',  type: 'future',  tv: '1週後'  },
-    { id: 7, x: 0.94, y: 0.58, z: 6.5, label: '下個月', type: 'future', tv: '1個月後' },
+    { id:1, x:0.50, y:0.50, z:5,   label:'現在',   type:'present', tv:'今天',    material:'' },
+    { id:2, x:0.25, y:0.48, z:5,   label:'昨天',   type:'past',    tv:'1天前',   material:'' },
+    { id:3, x:0.12, y:0.44, z:4,   label:'上週',   type:'past',    tv:'1週前',   material:'' },
+    { id:4, x:0.05, y:0.40, z:3.5, label:'上個月', type:'past',    tv:'1個月前', material:'' },
+    { id:5, x:0.72, y:0.52, z:5.5, label:'明天',   type:'future',  tv:'1天後',   material:'' },
+    { id:6, x:0.85, y:0.55, z:6,   label:'下週',   type:'future',  tv:'1週後',   material:'' },
+    { id:7, x:0.94, y:0.58, z:7,   label:'下個月', type:'future',  tv:'1個月後', material:'' },
   ],
-  texture: '光束',
   nextId: 8,
   selected: null,
   pendingPos: null,
 };
 
 // ─────────────────────────────────────────
-//  UTILITIES
+//  HISTORY  (undo / redo)
 // ─────────────────────────────────────────
-function col(type) { return COLORS[type] || '#fff'; }
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  return `${r},${g},${b}`;
+let hist    = [];
+let histIdx = -1;
+
+function saveState() {
+  hist = hist.slice(0, histIdx + 1);
+  hist.push(JSON.parse(JSON.stringify(state.points)));
+  histIdx = hist.length - 1;
+  if (hist.length > 60) { hist.shift(); histIdx--; }
+  syncHistBtns();
 }
+function syncHistBtns() {
+  document.getElementById('undo-btn').disabled = histIdx <= 0;
+  document.getElementById('redo-btn').disabled = histIdx >= hist.length - 1;
+}
+function undo() {
+  if (histIdx <= 0) return;
+  histIdx--;
+  state.points = JSON.parse(JSON.stringify(hist[histIdx]));
+  clearSel(); refreshAll(); syncHistBtns();
+}
+function redo() {
+  if (histIdx >= hist.length - 1) return;
+  histIdx++;
+  state.points = JSON.parse(JSON.stringify(hist[histIdx]));
+  clearSel(); refreshAll(); syncHistBtns();
+}
+function resetAll() {
+  if (!confirm('確定要重設？所有時間點將被清除，只保留「現在」人物。')) return;
+  state.points = [{ id: state.nextId++, x:0.5, y:0.5, z:5,
+    label:'現在', type:'present', tv:'今天', material:'' }];
+  clearSel(); saveState(); refreshAll();
+}
+function clearSel() {
+  state.selected = null;
+  document.getElementById('edit-card').style.display = 'none';
+}
+function refreshAll() { drawTop(); drawSection(); update3D(); renderList(); }
+
+// ─────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────
 function sortedPoints() {
-  const order = { past: 0, present: 1, future: 2 };
-  return [...state.points].sort((a,b) => {
-    if (order[a.type] !== order[b.type]) return order[a.type] - order[b.type];
-    return a.id - b.id;
-  });
-}
-function syncZ(prefix) {
-  const v = document.getElementById(`${prefix}-z`).value;
-  document.getElementById(`${prefix}-z-val`).textContent = v;
+  const order = { past:0, present:1, future:2 };
+  return [...state.points].sort((a,b) =>
+    order[a.type] !== order[b.type] ? order[a.type]-order[b.type] : a.id-b.id);
 }
 
 // ─────────────────────────────────────────
@@ -536,16 +377,16 @@ function switchTab(btn, id) {
   btn.classList.add('active');
   document.getElementById(id).classList.add('active');
   if (id === 'view-top')     { resizeTop(); }
-  if (id === 'view-section') { setTimeout(drawSection, 30); }
+  if (id === 'view-section') { setTimeout(() => { resizeSec(); drawSection(); }, 30); }
   if (id === 'view-3d')      { setTimeout(init3D, 30); }
 }
 
-// ─────────────────────────────────────────
-//  TOP VIEW CANVAS
-// ─────────────────────────────────────────
+// ════════════════════════════════════════
+//  TOP VIEW
+// ════════════════════════════════════════
 const topCanvas = document.getElementById('topCanvas');
 const topCtx    = topCanvas.getContext('2d');
-let drag = null, dragOX = 0, dragOY = 0;
+let topDrag = null, topDragOX = 0, topDragOY = 0, topDragMoved = false;
 
 function resizeTop() {
   const el = topCanvas.parentElement;
@@ -553,411 +394,525 @@ function resizeTop() {
   topCanvas.height = el.clientHeight;
   drawTop();
 }
-
-// Convert normalised (0–1) to canvas px
-function toCanvasPx(pt) {
-  return { cx: pt.x * topCanvas.width, cy: pt.y * topCanvas.height };
+function toPx(pt)   { return { cx: pt.x * topCanvas.width, cy: pt.y * topCanvas.height }; }
+function toNorm(cx,cy) {
+  return { x: Math.max(0,Math.min(1, cx/topCanvas.width)),
+           y: Math.max(0,Math.min(1, cy/topCanvas.height)) };
 }
-function toNorm(cx, cy) {
-  return { x: cx / topCanvas.width, y: cy / topCanvas.height };
-}
-
-function hitTest(cx, cy) {
-  const r = 16;
+function hitTop(cx,cy) {
   for (const p of state.points) {
-    const pp = toCanvasPx(p);
-    const dx = pp.cx - cx, dy = pp.cy - cy;
-    if (dx*dx + dy*dy < r*r) return p;
+    const pp = toPx(p), dx = pp.cx-cx, dy = pp.cy-cy;
+    if (dx*dx+dy*dy < 18*18) return p;
   }
   return null;
+}
+function evPosTop(e) {
+  const r = topCanvas.getBoundingClientRect();
+  const sx = topCanvas.width/r.width, sy = topCanvas.height/r.height;
+  const src = e.touches ? e.touches[0] : e;
+  return { cx: (src.clientX-r.left)*sx, cy: (src.clientY-r.top)*sy };
 }
 
 function drawTop() {
   const ctx = topCtx, W = topCanvas.width, H = topCanvas.height;
-  ctx.clearRect(0, 0, W, H);
-
-  // Background
-  ctx.fillStyle = '#0A0A18';
-  ctx.fillRect(0, 0, W, H);
-
-  // Grid
-  ctx.strokeStyle = 'rgba(255,255,255,0.035)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for (let y = 0; y < H; y += 60) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-
-  // Center cross (faint)
-  ctx.setLineDash([4,6]);
-  ctx.strokeStyle = 'rgba(0,212,170,0.08)';
-  ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Timeline line
-  const pts = sortedPoints();
-  if (pts.length >= 2) drawTimelineLine(ctx, pts);
-
-  // Person at 現在 point
-  const now = state.points.find(p => p.type === 'present');
-  if (now) {
-    const pp = toCanvasPx(now);
-    drawPerson(ctx, pp.cx, pp.cy);
-  }
-
-  // Points
-  state.points.forEach(p => drawDot(ctx, p));
-}
-
-function drawTimelineLine(ctx, pts) {
-  ctx.save();
-  if (state.texture === '光束') {
-    for (let i = 0; i < pts.length-1; i++) {
-      const a = toCanvasPx(pts[i]), b = toCanvasPx(pts[i+1]);
-      const g = ctx.createLinearGradient(a.cx,a.cy,b.cx,b.cy);
-      g.addColorStop(0, col(pts[i].type));
-      g.addColorStop(1, col(pts[i+1].type));
-      ctx.shadowColor = col(pts[i].type); ctx.shadowBlur = 18;
-      ctx.strokeStyle = g; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(a.cx,a.cy); ctx.lineTo(b.cx,b.cy); ctx.stroke();
-      ctx.shadowBlur = 35; ctx.lineWidth = 1; ctx.globalAlpha = 0.25;
-      ctx.stroke(); ctx.globalAlpha = 1;
-    }
-  } else if (state.texture === '麻繩') {
-    ctx.setLineDash([9,4,2,4]); ctx.lineWidth = 3.5;
-    for (let i = 0; i < pts.length-1; i++) {
-      const a = toCanvasPx(pts[i]), b = toCanvasPx(pts[i+1]);
-      ctx.strokeStyle = '#C4A040';
-      ctx.beginPath(); ctx.moveTo(a.cx,a.cy); ctx.lineTo(b.cx,b.cy); ctx.stroke();
-    }
-    ctx.setLineDash([]);
-  } else if (state.texture === '鐵鍊') {
-    ctx.setLineDash([7,4]); ctx.lineWidth = 4;
-    for (let i = 0; i < pts.length-1; i++) {
-      const a = toCanvasPx(pts[i]), b = toCanvasPx(pts[i+1]);
-      ctx.strokeStyle = '#909090'; ctx.shadowColor = '#555'; ctx.shadowBlur = 6;
-      ctx.beginPath(); ctx.moveTo(a.cx,a.cy); ctx.lineTo(b.cx,b.cy); ctx.stroke();
-    }
-    ctx.setLineDash([]);
-  } else if (state.texture === '流水') {
-    ctx.setLineDash([16,5]); ctx.lineWidth = 2.5;
-    for (let i = 0; i < pts.length-1; i++) {
-      const a = toCanvasPx(pts[i]), b = toCanvasPx(pts[i+1]);
-      ctx.strokeStyle = 'rgba(80,180,255,0.85)'; ctx.shadowColor = '#50B4FF'; ctx.shadowBlur = 12;
-      ctx.beginPath(); ctx.moveTo(a.cx,a.cy); ctx.lineTo(b.cx,b.cy); ctx.stroke();
-    }
-    ctx.setLineDash([]);
-  }
-  ctx.restore();
-}
-
-function drawPerson(ctx, cx, cy) {
-  ctx.save();
-  ctx.shadowColor = '#00D4AA'; ctx.shadowBlur = 20;
-  ctx.strokeStyle = '#00D4AA'; ctx.lineWidth = 2.2;
-  ctx.fillStyle = 'rgba(0,212,170,0.12)';
-  // Head
-  ctx.beginPath(); ctx.arc(cx, cy-26, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-  // Body
-  ctx.beginPath(); ctx.moveTo(cx, cy-15); ctx.lineTo(cx, cy+10); ctx.stroke();
-  // Arms
-  ctx.beginPath(); ctx.moveTo(cx-13, cy-4); ctx.lineTo(cx+13, cy-4); ctx.stroke();
-  // Legs
-  ctx.beginPath(); ctx.moveTo(cx, cy+10); ctx.lineTo(cx-9, cy+26); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx, cy+10); ctx.lineTo(cx+9, cy+26); ctx.stroke();
-  // Direction arrow (facing up = toward top of canvas)
-  ctx.shadowBlur = 10;
-  ctx.fillStyle = '#00D4AA';
-  ctx.beginPath(); ctx.moveTo(cx, cy-48); ctx.lineTo(cx-7, cy-37); ctx.lineTo(cx+7, cy-37); ctx.closePath(); ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = 'rgba(0,212,170,0.65)';
-  ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('面向', cx, cy-55);
-  ctx.fillText('當事人', cx, cy+38);
-  ctx.restore();
-}
-
-function drawDot(ctx, p) {
-  const { cx, cy } = toCanvasPx(p);
-  const c = col(p.type);
-  const sel = p.id === state.selected;
-  ctx.save();
-  ctx.shadowColor = c; ctx.shadowBlur = sel ? 28 : 14;
-  ctx.beginPath(); ctx.arc(cx, cy, sel ? 15 : 11, 0, Math.PI*2);
-  ctx.fillStyle = sel ? c : c + 'BB'; ctx.fill();
-  ctx.strokeStyle = '#FFF'; ctx.lineWidth = sel ? 2.5 : 1.5; ctx.stroke();
-  ctx.shadowBlur = 0;
-  // Z bar (small)
-  const bh = 20, zPct = p.z / 10;
-  ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(cx+15, cy-10, 5, bh);
-  ctx.fillStyle = c;                        ctx.fillRect(cx+15, cy+10-bh*zPct, 5, bh*zPct);
-  // Label
-  ctx.fillStyle = '#FFF'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  const lbl = p.label.length > 3 ? p.label.slice(0,3) : p.label;
-  ctx.fillText(lbl, cx, cy);
-  ctx.fillStyle = c; ctx.font = '10px sans-serif'; ctx.textBaseline = 'top';
-  ctx.fillText(p.tv, cx, cy + (sel ? 20 : 16));
-  ctx.restore();
-}
-
-// ── Mouse / Touch ──
-function evPos(e) {
-  const r = topCanvas.getBoundingClientRect();
-  const sx = topCanvas.width / r.width, sy = topCanvas.height / r.height;
-  const src = e.touches ? e.touches[0] : e;
-  return { cx: (src.clientX - r.left)*sx, cy: (src.clientY - r.top)*sy };
-}
-
-topCanvas.addEventListener('mousedown', e => {
-  const {cx,cy} = evPos(e);
-  const hit = hitTest(cx,cy);
-  if (hit) { drag = hit; dragOX = cx - toCanvasPx(hit).cx; dragOY = cy - toCanvasPx(hit).cy; select(hit.id); }
-  else select(null);
-});
-topCanvas.addEventListener('mousemove', e => {
-  if (!drag) return;
-  const {cx,cy} = evPos(e);
-  const n = toNorm(cx-dragOX, cy-dragOY);
-  drag.x = Math.max(0,Math.min(1,n.x));
-  drag.y = Math.max(0,Math.min(1,n.y));
-  drawTop(); afterChange();
-});
-topCanvas.addEventListener('mouseup', () => { drag = null; afterChange(); });
-topCanvas.addEventListener('click', e => {
-  // single click on empty = do nothing (double click handles add)
-});
-topCanvas.addEventListener('dblclick', e => {
-  const {cx,cy} = evPos(e);
-  const hit = hitTest(cx,cy);
-  if (hit) { select(hit.id); openEditCard(); }
-  else { state.pendingPos = toNorm(cx,cy); openAddModal(); }
-});
-topCanvas.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const {cx,cy} = evPos(e);
-  const hit = hitTest(cx,cy);
-  if (hit) { drag = hit; dragOX = cx - toCanvasPx(hit).cx; dragOY = cy - toCanvasPx(hit).cy; select(hit.id); }
-}, { passive: false });
-topCanvas.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if (!drag) return;
-  const {cx,cy} = evPos(e);
-  const n = toNorm(cx-dragOX, cy-dragOY);
-  drag.x = Math.max(0,Math.min(1,n.x));
-  drag.y = Math.max(0,Math.min(1,n.y));
-  drawTop(); afterChange();
-}, { passive: false });
-topCanvas.addEventListener('touchend', () => { drag = null; afterChange(); });
-
-function select(id) {
-  state.selected = id;
-  renderList();
-  if (id) openEditCard(); else document.getElementById('edit-card').style.display = 'none';
-  drawTop();
-}
-function openEditCard() {
-  const p = state.points.find(x => x.id === state.selected); if (!p) return;
-  document.getElementById('edit-card').style.display = 'block';
-  document.getElementById('edit-name').value  = p.label;
-  document.getElementById('edit-type').value  = p.type;
-  document.getElementById('edit-timeval').value = p.tv;
-  document.getElementById('edit-z').value     = p.z;
-  document.getElementById('edit-z-val').textContent = p.z;
-}
-document.getElementById('edit-z').addEventListener('input', function() {
-  const p = state.points.find(x => x.id === state.selected);
-  if (p) { p.z = parseFloat(this.value); drawTop(); drawSection(); update3D(); }
-});
-function applyEdit() {
-  const p = state.points.find(x => x.id === state.selected); if (!p) return;
-  p.label = document.getElementById('edit-name').value || p.label;
-  p.type  = document.getElementById('edit-type').value;
-  p.tv    = document.getElementById('edit-timeval').value || p.tv;
-  p.z     = parseFloat(document.getElementById('edit-z').value);
-  drawTop(); drawSection(); update3D(); renderList();
-}
-function deleteSelected() {
-  if (!state.selected || state.points.length <= 1) return;
-  state.points = state.points.filter(x => x.id !== state.selected);
-  state.selected = null;
-  document.getElementById('edit-card').style.display = 'none';
-  drawTop(); drawSection(); update3D(); renderList();
-}
-function setTexture(t, btn) {
-  state.texture = t;
-  document.querySelectorAll('.tex-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  drawTop(); update3D();
-}
-function renderList() {
-  const el = document.getElementById('point-list'); el.innerHTML = '';
-  sortedPoints().forEach(p => {
-    const d = document.createElement('div');
-    d.className = 'point-item' + (p.id === state.selected ? ' active' : '');
-    d.innerHTML = `<div class="pt-dot" style="background:${col(p.type)};color:${col(p.type)}"></div>
-      <div class="pt-info"><div class="pt-name">${p.label}</div><div class="pt-meta">${p.tv}　Z:${p.z}</div></div>`;
-    d.onclick = () => select(p.id);
-    el.appendChild(d);
-  });
-}
-function afterChange() { renderList(); drawSection(); update3D(); }
-
-// ─────────────────────────────────────────
-//  ADD MODAL
-// ─────────────────────────────────────────
-function openAddModal() {
-  document.getElementById('add-modal').classList.add('open');
-  document.getElementById('add-name').value = '';
-  document.getElementById('add-type').value = 'future';
-  document.getElementById('add-timeval').value = '';
-  document.getElementById('add-z').value = '5';
-  document.getElementById('add-z-val').textContent = '5';
-}
-function closeAddModal() {
-  document.getElementById('add-modal').classList.remove('open');
-  state.pendingPos = null;
-}
-function confirmAdd() {
-  const pos = state.pendingPos || { x: 0.5 + (Math.random()-0.5)*0.3, y: 0.5 + (Math.random()-0.5)*0.2 };
-  const p = {
-    id: state.nextId++,
-    x: pos.x, y: pos.y,
-    z: parseFloat(document.getElementById('add-z').value),
-    label: document.getElementById('add-name').value || '新點位',
-    type:  document.getElementById('add-type').value,
-    tv:    document.getElementById('add-timeval').value || '?',
-  };
-  state.points.push(p);
-  closeAddModal();
-  drawTop(); drawSection(); update3D(); renderList();
-  select(p.id);
-}
-// Close modal on backdrop click
-document.getElementById('add-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeAddModal();
-});
-
-// ─────────────────────────────────────────
-//  CROSS SECTION
-// ─────────────────────────────────────────
-const secCanvas = document.getElementById('sectionCanvas');
-const secCtx    = secCanvas.getContext('2d');
-
-function drawSection() {
-  const area = secCanvas.parentElement;
-  secCanvas.width  = area.clientWidth;
-  secCanvas.height = area.clientHeight;
-  const ctx = secCtx, W = secCanvas.width, H = secCanvas.height;
-  const padL = 70, padR = 30, padT = 40, padB = 60;
-  const cW = W - padL - padR, cH = H - padT - padB;
-
+  ctx.clearRect(0,0,W,H);
   // BG
   ctx.fillStyle = '#0A0A18'; ctx.fillRect(0,0,W,H);
   // Grid
   ctx.strokeStyle = 'rgba(255,255,255,0.03)'; ctx.lineWidth = 1;
   for (let x=0;x<W;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
   for (let y=0;y<H;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-
-  // Axes
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+cH); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(padL, padT+cH); ctx.lineTo(padL+cW, padT+cH); ctx.stroke();
-
-  // Y ticks + labels
-  ctx.fillStyle = '#8A8AAA'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
-  for (let z=0; z<=10; z+=2) {
-    const ty = padT + cH - (z/10)*cH;
-    ctx.fillText(z, padL-7, ty+4);
-    ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(padL-4,ty); ctx.lineTo(padL+cW,ty); ctx.stroke();
-  }
-
-  // Axis labels
-  ctx.fillStyle = '#8A8AAA'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('← 過去　｜　時間軸　｜　未來 →', padL+cW/2, H-12);
-  ctx.save(); ctx.translate(14, padT+cH/2); ctx.rotate(-Math.PI/2);
-  ctx.fillText('高度 Z', 0, 0); ctx.restore();
-
-  // Person height reference line (Z=5)
-  const refY = padT + cH - (5/10)*cH;
-  ctx.setLineDash([5,5]); ctx.strokeStyle = 'rgba(0,212,170,0.25)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(padL,refY); ctx.lineTo(padL+cW,refY); ctx.stroke();
+  // Center cross
+  ctx.setLineDash([4,6]); ctx.strokeStyle = 'rgba(0,212,170,0.07)';
+  ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle = 'rgba(0,212,170,0.5)'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText('── 腰部基準', padL+cW+2, refY+4);
-
-  // Compute X positions for each point along the section
+  // Timeline line (under person)
   const pts = sortedPoints();
-  const past = pts.filter(p=>p.type==='past');
-  const now  = pts.filter(p=>p.type==='present');
-  const future = pts.filter(p=>p.type==='future');
-  const mapped = [];
-  past.forEach((p,i) => { mapped.push({ ...p, sx: padL + (i+1)/(past.length+1) * cW*0.42 }); });
-  now.forEach(p  => { mapped.push({ ...p, sx: padL + cW*0.5 }); });
-  future.forEach((p,i) => { mapped.push({ ...p, sx: padL + cW*0.58 + (i+1)/(future.length+1)*cW*0.42 }); });
-  mapped.forEach(p => { p.sy = padT + cH - (p.z/10)*cH; });
+  if (pts.length >= 2) drawTopLine(ctx, pts);
+  // Person — always visible (present point or canvas centre)
+  const nowPt = state.points.find(p => p.type==='present');
+  const pp = nowPt ? toPx(nowPt) : { cx: W/2, cy: H/2 };
+  drawPersonTop(ctx, pp.cx, pp.cy);
+  // Point dots
+  state.points.forEach(p => drawDot(ctx, p));
+}
 
-  // Person silhouette at center
-  const pSx = padL + cW * 0.5;
-  ctx.save(); ctx.shadowColor = '#00D4AA'; ctx.shadowBlur = 12;
-  ctx.strokeStyle = '#00D4AA'; ctx.lineWidth = 2; ctx.fillStyle = 'rgba(0,212,170,0.12)';
-  const headY = padT + cH - (8.8/10)*cH;
-  ctx.beginPath(); ctx.arc(pSx, headY, 10, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(pSx, headY+10); ctx.lineTo(pSx, headY+38); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(pSx, headY+38); ctx.lineTo(pSx-8, headY+65); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(pSx, headY+38); ctx.lineTo(pSx+8, headY+65); ctx.stroke();
+function drawTopLine(ctx, pts) {
+  ctx.save();
+  ctx.shadowColor = LINE_COLOR; ctx.shadowBlur = 22;
+  ctx.strokeStyle = LINE_COLOR; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(toPx(pts[0]).cx, toPx(pts[0]).cy);
+  for (let i=1; i<pts.length; i++) { const p=toPx(pts[i]); ctx.lineTo(p.cx,p.cy); }
+  ctx.stroke();
+  ctx.shadowBlur = 40; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.28;
+  ctx.beginPath();
+  ctx.moveTo(toPx(pts[0]).cx, toPx(pts[0]).cy);
+  for (let i=1; i<pts.length; i++) { const p=toPx(pts[i]); ctx.lineTo(p.cx,p.cy); }
+  ctx.stroke();
+  ctx.globalAlpha = 1; ctx.restore();
+}
+
+function drawPersonTop(ctx, cx, cy) {
+  ctx.save();
+  ctx.shadowColor = '#00D4AA'; ctx.shadowBlur = 20;
+  ctx.strokeStyle = '#00D4AA'; ctx.lineWidth = 2.2;
+  ctx.fillStyle = 'rgba(0,212,170,0.12)';
+  ctx.beginPath(); ctx.arc(cx, cy-28, 13, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, cy-15); ctx.lineTo(cx, cy+12); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx-15, cy-3); ctx.lineTo(cx+15, cy-3); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, cy+12); ctx.lineTo(cx-10, cy+30); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, cy+12); ctx.lineTo(cx+10, cy+30); ctx.stroke();
+  // Direction arrow (up = person faces forward/up)
+  ctx.fillStyle = '#00D4AA'; ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.moveTo(cx, cy-52); ctx.lineTo(cx-9, cy-40); ctx.lineTo(cx+9, cy-40); ctx.closePath(); ctx.fill();
   ctx.shadowBlur = 0;
-  ctx.fillStyle = 'rgba(0,212,170,0.6)'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('當事人（側面）', pSx, padT+cH+22);
+  ctx.font = 'bold 13px sans-serif'; ctx.fillStyle = 'rgba(0,212,170,0.8)';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('面向', cx, cy-54);
+  ctx.font = '12px sans-serif'; ctx.fillStyle = 'rgba(0,212,170,0.55)';
+  ctx.textBaseline = 'top'; ctx.fillText('當事人', cx, cy+34);
   ctx.restore();
+}
 
-  // Draw connecting line
-  if (mapped.length >= 2) {
-    ctx.save(); ctx.lineWidth = 3; ctx.shadowBlur = 14;
-    for (let i=0; i<mapped.length-1; i++) {
-      const a=mapped[i], b=mapped[i+1];
-      const g = ctx.createLinearGradient(a.sx,a.sy,b.sx,b.sy);
-      g.addColorStop(0,col(a.type)); g.addColorStop(1,col(b.type));
-      ctx.strokeStyle = g; ctx.shadowColor = col(a.type);
-      ctx.beginPath(); ctx.moveTo(a.sx,a.sy); ctx.lineTo(b.sx,b.sy); ctx.stroke();
-    }
-    ctx.restore();
+function drawDot(ctx, p) {
+  const { cx, cy } = toPx(p);
+  const c = col(p.type);
+  const sel = p.id === state.selected;
+  const R = sel ? 16 : 12;
+  ctx.save();
+  ctx.shadowColor = c; ctx.shadowBlur = sel ? 30 : 18;
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2);
+  ctx.fillStyle = sel ? c : c+'CC'; ctx.fill();
+  ctx.strokeStyle = '#FFF'; ctx.lineWidth = sel ? 2.5 : 1.8; ctx.stroke();
+  ctx.shadowBlur = 0;
+  // Label inside
+  ctx.fillStyle = '#FFF'; ctx.font = `bold ${sel?14:13}px sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(p.label.length > 3 ? p.label.slice(0,3) : p.label, cx, cy);
+  // Time value below
+  ctx.fillStyle = c; ctx.font = `${sel?13:12}px sans-serif`; ctx.textBaseline = 'top';
+  ctx.fillText(p.tv, cx, cy + R + 4);
+  // Z hint
+  ctx.fillStyle = 'rgba(200,232,255,0.5)'; ctx.font = '11px sans-serif';
+  ctx.fillText('Z:'+p.z, cx, cy + R + 19);
+  ctx.restore();
+}
+
+// ── Top Canvas Events ──
+topCanvas.addEventListener('mousedown', e => {
+  const pos = evPosTop(e);
+  const hit = hitTop(pos.cx, pos.cy);
+  topDragMoved = false;
+  if (hit) {
+    topDrag = hit;
+    topDragOX = pos.cx - toPx(hit).cx;
+    topDragOY = pos.cy - toPx(hit).cy;
+    select(hit.id);
   }
+});
+topCanvas.addEventListener('mousemove', e => {
+  if (!topDrag) return;
+  const pos = evPosTop(e);
+  const n = toNorm(pos.cx - topDragOX, pos.cy - topDragOY);
+  topDrag.x = n.x; topDrag.y = n.y;
+  topDragMoved = true;
+  drawTop(); drawSection(); update3D();
+});
+topCanvas.addEventListener('mouseup', () => {
+  if (topDrag && topDragMoved) saveState();
+  topDrag = null; renderList();
+});
+topCanvas.addEventListener('click', e => {
+  if (topDragMoved) return;
+  const pos = evPosTop(e);
+  if (!hitTop(pos.cx, pos.cy)) clearSel(); drawTop();
+});
+topCanvas.addEventListener('dblclick', e => {
+  const pos = evPosTop(e);
+  const hit = hitTop(pos.cx, pos.cy);
+  if (hit) { select(hit.id); openEditCard(); }
+  else { state.pendingPos = toNorm(pos.cx, pos.cy); openAddModal(); }
+});
+topCanvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const pos = evPosTop(e);
+  const hit = hitTop(pos.cx, pos.cy);
+  topDragMoved = false;
+  if (hit) { topDrag = hit; topDragOX = pos.cx-toPx(hit).cx; topDragOY = pos.cy-toPx(hit).cy; select(hit.id); }
+}, { passive:false });
+topCanvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!topDrag) return;
+  const pos = evPosTop(e);
+  const n = toNorm(pos.cx-topDragOX, pos.cy-topDragOY);
+  topDrag.x = n.x; topDrag.y = n.y;
+  topDragMoved = true;
+  drawTop(); drawSection(); update3D();
+}, { passive:false });
+topCanvas.addEventListener('touchend', () => {
+  if (topDrag && topDragMoved) saveState();
+  topDrag = null; renderList();
+});
 
-  // Draw points
-  mapped.forEach(p => {
-    const c = col(p.type);
-    ctx.save(); ctx.shadowColor = c; ctx.shadowBlur = 14;
-    ctx.beginPath(); ctx.arc(p.sx, p.sy, 8, 0, Math.PI*2);
-    ctx.fillStyle = c; ctx.fill();
-    ctx.strokeStyle = '#FFF'; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#F0F0F0'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(p.label, p.sx, p.sy-16);
-    ctx.fillStyle = c; ctx.font = '9px sans-serif';
-    ctx.fillText(p.tv, p.sx, p.sy+18);
-    ctx.restore();
+// ── Selection & Edit ──
+function select(id) {
+  state.selected = id;
+  renderList();
+  if (id) openEditCard();
+  else document.getElementById('edit-card').style.display = 'none';
+  drawTop();
+}
+
+function openEditCard() {
+  const p = state.points.find(x => x.id === state.selected);
+  if (!p) return;
+  document.getElementById('edit-card').style.display = 'block';
+  document.getElementById('edit-name').value     = p.label;
+  document.getElementById('edit-type').value     = p.type;
+  document.getElementById('edit-timeval').value  = p.tv;
+  document.getElementById('edit-material').value = p.material || '';
+}
+
+function applyEdit() {
+  const id = state.selected;
+  const p  = state.points.find(x => x.id === id);
+  if (!p) { alert('請先選取一個點位'); return; }
+
+  const name = document.getElementById('edit-name').value.trim();
+  const tv   = document.getElementById('edit-timeval').value.trim();
+  const mat  = document.getElementById('edit-material').value.trim();
+  const type = document.getElementById('edit-type').value;
+
+  if (name) p.label = name;
+  p.type     = type;
+  if (tv)  p.tv = tv;
+  p.material = mat;
+
+  saveState();
+  drawTop(); drawSection(); update3D(); renderList();
+  // Ensure card still shows with fresh values
+  state.selected = id;
+  openEditCard();
+}
+
+function deleteSelected() {
+  if (!state.selected || state.points.length <= 1) return;
+  state.points = state.points.filter(x => x.id !== state.selected);
+  clearSel(); saveState(); refreshAll();
+}
+
+function renderList() {
+  const el = document.getElementById('point-list');
+  el.innerHTML = '';
+  sortedPoints().forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'point-item' + (p.id === state.selected ? ' active' : '');
+    d.innerHTML =
+      `<div class="pt-dot" style="background:${col(p.type)}"></div>
+       <div class="pt-info">
+         <div class="pt-name">${p.label}</div>
+         <div class="pt-meta">${p.tv}　Z:${p.z}${p.material ? '　'+p.material : ''}</div>
+       </div>`;
+    d.onclick = () => select(p.id);
+    el.appendChild(d);
   });
 }
 
 // ─────────────────────────────────────────
-//  3D VIEW (Three.js)
+//  ADD MODAL
 // ─────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('add-modal').classList.add('open');
+  document.getElementById('add-name').value    = '';
+  document.getElementById('add-type').value    = 'future';
+  document.getElementById('add-timeval').value = '';
+  setTimeout(() => document.getElementById('add-name').focus(), 50);
+}
+function closeAddModal() {
+  document.getElementById('add-modal').classList.remove('open');
+  state.pendingPos = null;
+}
+function confirmAdd() {
+  const pos = state.pendingPos || {
+    x: 0.5 + (Math.random()-0.5)*0.3,
+    y: 0.5 + (Math.random()-0.5)*0.2
+  };
+  const p = {
+    id: state.nextId++,
+    x: pos.x, y: pos.y, z: 5,
+    label:    document.getElementById('add-name').value.trim() || '新點位',
+    type:     document.getElementById('add-type').value,
+    tv:       document.getElementById('add-timeval').value.trim() || '?',
+    material: '',
+  };
+  state.points.push(p);
+  closeAddModal();
+  saveState(); refreshAll(); select(p.id);
+}
+document.getElementById('add-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddModal();
+});
+
+// ════════════════════════════════════════
+//  CROSS SECTION VIEW
+// ════════════════════════════════════════
+const secCanvas = document.getElementById('sectionCanvas');
+const secCtx    = secCanvas.getContext('2d');
+const S_PL=70, S_PR=65, S_PT=50, S_PB=95; // padding
+let secMapped = [];   // computed positions from last drawSection
+let secDrag   = null;
+
+function resizeSec() {
+  const el = secCanvas.parentElement;
+  secCanvas.width  = el.clientWidth;
+  secCanvas.height = el.clientHeight;
+}
+function getSecLayout() {
+  const W = secCanvas.width, H = secCanvas.height;
+  return { W, H, cW: W-S_PL-S_PR, cH: H-S_PT-S_PB };
+}
+
+function drawSection() {
+  const { W, H, cW, cH } = getSecLayout();
+  const ctx = secCtx;
+  ctx.clearRect(0,0,W,H);
+  // BG
+  ctx.fillStyle = '#0A0A18'; ctx.fillRect(0,0,W,H);
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.025)'; ctx.lineWidth = 1;
+  for (let x=0;x<W;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for (let y=0;y<H;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // Axes
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(S_PL, S_PT); ctx.lineTo(S_PL, S_PT+cH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(S_PL, S_PT+cH); ctx.lineTo(S_PL+cW, S_PT+cH); ctx.stroke();
+
+  // Y ticks + grid lines
+  ctx.textAlign = 'right'; ctx.font = '12px sans-serif'; ctx.fillStyle = '#8A8AAA';
+  for (let z=0; z<=Z_MAX; z+=3) {
+    const ty = S_PT + cH - (z/Z_MAX)*cH;
+    ctx.fillText(z, S_PL-8, ty+4);
+    ctx.strokeStyle = (z===0) ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = (z===0) ? 1.5 : 1;
+    ctx.beginPath(); ctx.moveTo(S_PL-4, ty); ctx.lineTo(S_PL+cW, ty); ctx.stroke();
+  }
+
+  // Axis labels — two lines well below axis
+  ctx.fillStyle = '#8A8AAA'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('← 過去　｜　時間軸　｜　未來 →', S_PL+cW/2, S_PT+cH+32);
+  ctx.fillStyle = 'rgba(0,212,170,0.6)'; ctx.font = '12px sans-serif';
+  ctx.fillText('（人物面向右方，即未來方向）', S_PL+cW/2, S_PT+cH+52);
+
+  // Y axis label
+  ctx.save();
+  ctx.translate(16, S_PT+cH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillStyle = '#8A8AAA'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('高度 Z', 0, 0);
+  ctx.restore();
+
+  // Reference dashed lines
+  function refLine(z, color, lbl) {
+    const ty = S_PT + cH - (z/Z_MAX)*cH;
+    ctx.setLineDash([5,4]); ctx.strokeStyle = color; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(S_PL, ty); ctx.lineTo(S_PL+cW, ty); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = color; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(lbl, S_PL+cW+3, ty+4);
+  }
+  refLine(Z_PERSON_HEAD,   'rgba(0,212,170,0.45)', '← 頭頂');
+  refLine(Z_PERSON_HEAD/2, 'rgba(0,212,170,0.22)', '← 腰部');
+
+  // ── Person silhouette: stands on floor, faces RIGHT ──
+  const pSx   = S_PL + cW * 0.5;        // X centre (present point position)
+  const feetY = S_PT + cH;              // Z=0 → bottom of chart (floor)
+  const headY = S_PT + cH - (Z_PERSON_HEAD/Z_MAX)*cH; // Z=5 → head top
+  const bodyH = feetY - headY;
+  const hR    = bodyH * 0.165;           // head radius
+  const headCY = headY + hR;
+
+  ctx.save();
+  ctx.shadowColor = '#00D4AA'; ctx.shadowBlur = 14;
+  ctx.strokeStyle = '#00D4AA'; ctx.lineWidth = 2.2;
+  ctx.fillStyle   = 'rgba(0,212,170,0.1)';
+  // Head
+  ctx.beginPath(); ctx.arc(pSx, headCY, hR, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  // Torso
+  const shoulderY = headCY + hR;
+  const waistY    = headCY + bodyH * 0.55;
+  ctx.beginPath(); ctx.moveTo(pSx, shoulderY); ctx.lineTo(pSx, waistY); ctx.stroke();
+  // Arms — right arm forward (pointing right), left arm back
+  ctx.beginPath(); ctx.moveTo(pSx, shoulderY + hR*0.5);
+  ctx.lineTo(pSx + bodyH*0.22, shoulderY + hR*2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pSx, shoulderY + hR*0.5);
+  ctx.lineTo(pSx - bodyH*0.06, shoulderY + hR*2); ctx.stroke();
+  // Legs
+  ctx.beginPath(); ctx.moveTo(pSx, waistY); ctx.lineTo(pSx + bodyH*0.07, feetY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pSx, waistY); ctx.lineTo(pSx - bodyH*0.07, feetY); ctx.stroke();
+
+  // Direction arrow — pointing RIGHT
+  const arrowY = headCY - hR - 10;
+  const arrowTip = pSx + hR*2.8 + 10;
+  ctx.shadowBlur = 10; ctx.fillStyle = '#00D4AA';
+  ctx.beginPath();
+  ctx.moveTo(arrowTip, arrowY);
+  ctx.lineTo(arrowTip - hR*1.4, arrowY - 7);
+  ctx.lineTo(arrowTip - hR*1.4, arrowY + 7);
+  ctx.closePath(); ctx.fill();
+  // Arrow shaft
+  ctx.beginPath(); ctx.moveTo(pSx + hR, arrowY);
+  ctx.lineTo(arrowTip - hR*1.4, arrowY); ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(0,212,170,0.75)'; ctx.font = 'bold 12px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('當事人', pSx, feetY + 20);
+  ctx.fillStyle = 'rgba(0,212,170,0.5)'; ctx.font = '11px sans-serif';
+  ctx.fillText('面向右方 →', pSx, feetY + 36);
+  ctx.restore();
+
+  // ── Compute X positions for each point ──
+  const pts = sortedPoints();
+  const pastArr   = pts.filter(p => p.type==='past');
+  const nowArr    = pts.filter(p => p.type==='present');
+  const futureArr = pts.filter(p => p.type==='future');
+  const mapped = [];
+
+  pastArr.forEach((p,i) => {
+    const sx = S_PL + ((i+1)/(pastArr.length+1)) * cW * 0.44;
+    mapped.push({ ...p, sx, sy: S_PT + cH - (p.z/Z_MAX)*cH });
+  });
+  nowArr.forEach(p => {
+    mapped.push({ ...p, sx: S_PL + cW*0.5, sy: S_PT + cH - (p.z/Z_MAX)*cH });
+  });
+  futureArr.forEach((p,i) => {
+    const sx = S_PL + cW*0.56 + ((i+1)/(futureArr.length+1)) * cW * 0.44;
+    mapped.push({ ...p, sx, sy: S_PT + cH - (p.z/Z_MAX)*cH });
+  });
+  secMapped = mapped; // store for drag hit-test
+
+  // ── Timeline line ──
+  if (mapped.length >= 2) {
+    ctx.save();
+    ctx.shadowColor = LINE_COLOR; ctx.shadowBlur = 18;
+    ctx.strokeStyle = LINE_COLOR; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(mapped[0].sx, mapped[0].sy);
+    for (let i=1; i<mapped.length; i++) ctx.lineTo(mapped[i].sx, mapped[i].sy);
+    ctx.stroke();
+    ctx.shadowBlur = 38; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.28;
+    ctx.beginPath();
+    ctx.moveTo(mapped[0].sx, mapped[0].sy);
+    for (let i=1; i<mapped.length; i++) ctx.lineTo(mapped[i].sx, mapped[i].sy);
+    ctx.stroke();
+    ctx.globalAlpha = 1; ctx.restore();
+  }
+
+  // ── Point dots ──
+  mapped.forEach(p => {
+    const c = col(p.type);
+    const sel = p.id === state.selected;
+    const R = sel ? 14 : 10;
+    ctx.save();
+    ctx.shadowColor = c; ctx.shadowBlur = sel ? 26 : 16;
+    ctx.beginPath(); ctx.arc(p.sx, p.sy, R, 0, Math.PI*2);
+    ctx.fillStyle = sel ? c : c+'CC'; ctx.fill();
+    ctx.strokeStyle = '#FFF'; ctx.lineWidth = sel ? 2.5 : 1.8; ctx.stroke();
+    ctx.shadowBlur = 0;
+    // Label above
+    ctx.fillStyle = '#F0F0F0'; ctx.font = `bold 14px sans-serif`; ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom'; ctx.fillText(p.label, p.sx, p.sy - R - 3);
+    // Time value below
+    ctx.fillStyle = c; ctx.font = '13px sans-serif'; ctx.textBaseline = 'top';
+    ctx.fillText(p.tv, p.sx, p.sy + R + 5);
+    // Z value
+    ctx.fillStyle = 'rgba(200,232,255,0.65)'; ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('Z='+p.z, p.sx, p.sy + R + 21);
+    ctx.restore();
+  });
+}
+
+// ── Section Canvas Drag (vertical = Z change) ──
+function evPosSec(e) {
+  const r = secCanvas.getBoundingClientRect();
+  const sx = secCanvas.width/r.width, sy = secCanvas.height/r.height;
+  const src = e.touches ? e.touches[0] : e;
+  return { cx: (src.clientX-r.left)*sx, cy: (src.clientY-r.top)*sy };
+}
+function secHit(cx, cy) {
+  for (const p of secMapped) {
+    const dx = p.sx-cx, dy = p.sy-cy;
+    if (dx*dx+dy*dy < 18*18) return state.points.find(pt => pt.id===p.id);
+  }
+  return null;
+}
+function secYtoZ(cy) {
+  const { cH } = getSecLayout();
+  const z = (1 - (cy - S_PT) / cH) * Z_MAX;
+  return Math.round(Math.max(0, Math.min(Z_MAX, z)) * 4) / 4;
+}
+
+secCanvas.addEventListener('mousedown', e => {
+  const pos = evPosSec(e);
+  const hit = secHit(pos.cx, pos.cy);
+  if (hit) { secDrag = hit; select(hit.id); }
+  else { clearSel(); drawSection(); }
+});
+secCanvas.addEventListener('mousemove', e => {
+  // Cursor feedback
+  if (!secDrag) {
+    const pos = evPosSec(e);
+    secCanvas.style.cursor = secHit(pos.cx, pos.cy) ? 'ns-resize' : 'default';
+  }
+  if (!secDrag) return;
+  const pos = evPosSec(e);
+  secDrag.z = secYtoZ(pos.cy);
+  drawSection(); drawTop(); update3D(); renderList();
+});
+secCanvas.addEventListener('mouseup', () => {
+  if (secDrag) { saveState(); secDrag = null; }
+});
+secCanvas.addEventListener('mouseleave', () => {
+  if (secDrag) { saveState(); secDrag = null; }
+});
+secCanvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const pos = evPosSec(e);
+  const hit = secHit(pos.cx, pos.cy);
+  if (hit) { secDrag = hit; select(hit.id); }
+}, { passive:false });
+secCanvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!secDrag) return;
+  const pos = evPosSec(e);
+  secDrag.z = secYtoZ(pos.cy);
+  drawSection(); drawTop(); update3D();
+}, { passive:false });
+secCanvas.addEventListener('touchend', () => {
+  if (secDrag) { saveState(); secDrag = null; }
+});
+
+// ════════════════════════════════════════
+//  3D VIEW
+// ════════════════════════════════════════
 let scene, camera, renderer3d, controls3d;
-let ptMeshes = [], lineObj;
+let pt3Meshes = [], line3Obj = null, label3Sprites = [];
 let three_ready = false;
 
 function init3D() {
-  const cv = document.getElementById('canvas3d');
+  const cv  = document.getElementById('canvas3d');
   const ctr = cv.parentElement;
-  const W = ctr.clientWidth, H = ctr.clientHeight;
+  const W   = ctr.clientWidth, H = ctr.clientHeight;
 
   if (!three_ready) {
-    scene  = new THREE.Scene();
+    scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0A0A18);
 
     camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 500);
     camera.position.set(0, 8, 14);
-    camera.lookAt(0,1,0);
+    camera.lookAt(0, 1, 0);
 
     renderer3d = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
     renderer3d.setPixelRatio(window.devicePixelRatio);
@@ -965,20 +920,15 @@ function init3D() {
 
     controls3d = new THREE.OrbitControls(camera, renderer3d.domElement);
     controls3d.enableDamping = true; controls3d.dampingFactor = 0.07;
-    controls3d.target.set(0,1,0);
+    controls3d.target.set(0, 1, 0);
 
-    // Grid
     scene.add(new THREE.GridHelper(24, 24, 0x1A1A3A, 0x111130));
-    // Axes
     scene.add(new THREE.AxesHelper(4));
-    // Light
     scene.add(new THREE.AmbientLight(0xffffff, 0.5));
     const dl = new THREE.DirectionalLight(0xffffff, 0.8);
     dl.position.set(6, 12, 8); scene.add(dl);
 
-    // Person figure
     build3DPerson();
-
     three_ready = true;
     animate3D();
   }
@@ -988,69 +938,106 @@ function init3D() {
 }
 
 function build3DPerson() {
-  const g = new THREE.Group();
+  const g   = new THREE.Group();
   const mat = new THREE.MeshLambertMaterial({ color: 0x00D4AA, transparent: true, opacity: 0.85 });
-  // Head
-  const h = new THREE.Mesh(new THREE.SphereGeometry(0.28,16,16), mat);
-  h.position.y = 1.85; g.add(h);
-  // Torso
-  const t = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.2,0.9,8), mat);
-  t.position.y = 1.15; g.add(t);
-  // Arms
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28,16,16), mat);
+  head.position.y = 1.85; g.add(head);
+  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.2,0.9,8), mat);
+  torso.position.y = 1.15; g.add(torso);
   [-0.42, 0.42].forEach(x => {
     const a = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.7,8), mat);
     a.rotation.z = Math.PI/2; a.position.set(x, 1.35, 0); g.add(a);
   });
-  // Legs
   [-0.14, 0.14].forEach(x => {
     const l = new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,0.85,8), mat);
     l.position.set(x, 0.42, 0); g.add(l);
   });
-  // Direction arrow
-  g.add(new THREE.ArrowHelper(new THREE.Vector3(0,0,-1), new THREE.Vector3(0,1.6,0), 1.2, 0x00D4AA, 0.3, 0.22));
+  g.add(new THREE.ArrowHelper(
+    new THREE.Vector3(0,0,-1),
+    new THREE.Vector3(0, 1.6, 0), 1.3, 0x00D4AA, 0.35, 0.22));
   scene.add(g);
 }
 
+function makeLabel3D(line1, line2, type) {
+  const cv  = document.createElement('canvas');
+  cv.width  = 256; cv.height = 72;
+  const ctx = cv.getContext('2d');
+  const c   = col(type);
+  // Background
+  ctx.fillStyle = 'rgba(10,10,30,0.82)';
+  ctx.fillRect(3, 5, 250, 62);
+  ctx.strokeStyle = c; ctx.lineWidth = 2;
+  ctx.strokeRect(3, 5, 250, 62);
+  // Line 1 (name)
+  ctx.font = 'bold 24px Arial'; ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(line1, 128, 10);
+  // Line 2 (time value)
+  ctx.font = '16px Arial'; ctx.fillStyle = c;
+  ctx.fillText(line2, 128, 40);
+  const tex = new THREE.CanvasTexture(cv);
+  const sp  = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+  sp.scale.set(2.8, 0.78, 1);
+  return sp;
+}
+
+const cmap3D = {
+  past:    new THREE.Color(0x8A7FFF),
+  present: new THREE.Color(0x00D4AA),
+  future:  new THREE.Color(0xFFB347),
+};
+
 function update3D() {
   if (!three_ready) return;
-  ptMeshes.forEach(m => scene.remove(m)); ptMeshes = [];
-  if (lineObj) { scene.remove(lineObj); lineObj = null; }
+  pt3Meshes.forEach(m => scene.remove(m)); pt3Meshes = [];
+  label3Sprites.forEach(s => scene.remove(s)); label3Sprites = [];
+  if (line3Obj) { scene.remove(line3Obj); line3Obj = null; }
 
   const now = state.points.find(p => p.type==='present') || state.points[0];
-  const scale = 80;
   function toW(p) {
     return new THREE.Vector3(
-      (p.x - now.x) * scale / scale * 8,
-      p.z / 10 * 4 - 2,
-      (p.y - now.y) * scale / scale * 8
+      (p.x - now.x) * 8,
+      p.z / Z_MAX * 4 - 2,
+      (p.y - now.y) * 8
     );
   }
-  const colorMap = { past: new THREE.Color(0x6C63FF), present: new THREE.Color(0x00D4AA), future: new THREE.Color(0xFFB347) };
 
   state.points.forEach(p => {
     const pos = toW(p);
-    const mat = new THREE.MeshLambertMaterial({ color: colorMap[p.type] });
-    const m = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), mat);
+    const c3d = cmap3D[p.type];
+    const m   = new THREE.Mesh(
+      new THREE.SphereGeometry(0.22, 16, 16),
+      new THREE.MeshLambertMaterial({ color: c3d })
+    );
     m.position.copy(pos);
-    // Glow ring
-    const gm = new THREE.Mesh(new THREE.SphereGeometry(0.34, 16, 16),
-      new THREE.MeshBasicMaterial({ color: colorMap[p.type], transparent: true, opacity: 0.18 }));
-    m.add(gm);
-    scene.add(m); ptMeshes.push(m);
+    m.add(new THREE.Mesh(
+      new THREE.SphereGeometry(0.34,16,16),
+      new THREE.MeshBasicMaterial({ color: c3d, transparent: true, opacity: 0.18 })
+    ));
+    scene.add(m); pt3Meshes.push(m);
+
+    // Text label sprite
+    const sp = makeLabel3D(p.label, p.tv, p.type);
+    sp.position.set(pos.x, pos.y + 0.75, pos.z);
+    scene.add(sp); label3Sprites.push(sp);
   });
 
+  // Line — single unified colour
   const spts = sortedPoints();
   if (spts.length >= 2) {
-    const pos3 = [], col3 = [];
+    const positions = [];
+    const lineC = new THREE.Color(0xC8E8FF);
+    const colorsArr = [];
     spts.forEach(p => {
-      const v = toW(p); pos3.push(v.x, v.y, v.z);
-      const c = colorMap[p.type]; col3.push(c.r, c.g, c.b);
+      const v = toW(p);
+      positions.push(v.x, v.y, v.z);
+      colorsArr.push(lineC.r, lineC.g, lineC.b);
     });
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos3, 3));
-    geo.setAttribute('color',    new THREE.Float32BufferAttribute(col3, 3));
-    lineObj = new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, linewidth: 2 }));
-    scene.add(lineObj);
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute('color',    new THREE.Float32BufferAttribute(colorsArr, 3));
+    line3Obj = new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, linewidth: 2 }));
+    scene.add(line3Obj);
   }
 }
 
@@ -1060,22 +1047,34 @@ function animate3D() {
   if (renderer3d && scene && camera) renderer3d.render(scene, camera);
 }
 
-// ─────────────────────────────────────────
+// ════════════════════════════════════════
+//  KEYBOARD SHORTCUTS
+// ════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement.tagName;
+  if (e.key === 'Escape') closeAddModal();
+  if ((e.key==='Delete'||e.key==='Backspace') && tag!=='INPUT' && tag!=='SELECT') deleteSelected();
+  if ((e.metaKey||e.ctrlKey) && !e.shiftKey && (e.key==='z'||e.key==='Z')) { e.preventDefault(); undo(); }
+  if ((e.metaKey||e.ctrlKey) && e.shiftKey  && (e.key==='z'||e.key==='Z')) { e.preventDefault(); redo(); }
+  if ((e.metaKey||e.ctrlKey) && (e.key==='y'||e.key==='Y'))                 { e.preventDefault(); redo(); }
+});
+
+// ════════════════════════════════════════
 //  INIT
-// ─────────────────────────────────────────
-window.addEventListener('load', () => { resizeTop(); renderList(); });
+// ════════════════════════════════════════
+window.addEventListener('load', () => {
+  resizeTop();
+  renderList();
+  saveState(); // save initial state so undo works from start
+});
 window.addEventListener('resize', () => {
   if (document.getElementById('view-top').classList.contains('active'))     resizeTop();
-  if (document.getElementById('view-section').classList.contains('active')) drawSection();
+  if (document.getElementById('view-section').classList.contains('active')) { resizeSec(); drawSection(); }
   if (three_ready) {
     const cv = document.getElementById('canvas3d'), ctr = cv.parentElement;
     renderer3d.setSize(ctr.clientWidth, ctr.clientHeight);
-    camera.aspect = ctr.clientWidth / ctr.clientHeight; camera.updateProjectionMatrix();
+    camera.aspect = ctr.clientWidth/ctr.clientHeight; camera.updateProjectionMatrix();
   }
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeAddModal();
-  if ((e.key === 'Delete' || e.key === 'Backspace') && document.activeElement.tagName !== 'INPUT') deleteSelected();
 });
 </script>
 </body>
